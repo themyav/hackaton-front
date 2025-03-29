@@ -1,4 +1,5 @@
 import ParkingRow from "../components/ParkingRow/index.tsx"
+import NavBar from "../navigation/NavBar.tsx";
 
 
 const MapPage = () => {
@@ -29,7 +30,7 @@ const MapPage = () => {
     const third = generateParkingRows(2, 5);
 
     return (
-        <>
+        <NavBar>
             <style>
                 {`
  .parkingMap {
@@ -92,9 +93,8 @@ const MapPage = () => {
                 </div>
 
 
-
             </div>
-        </>
+        </NavBar>
     );
 };
 
