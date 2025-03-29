@@ -13,6 +13,10 @@ function LoginForm() {
         password: '',
     });
 
+    React.useEffect(() => {
+        window.history.replaceState({}, document.title);
+    }, []);
+
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -25,9 +29,11 @@ function LoginForm() {
         try {
             const response = await loginUser(loginData);
             // if (response.status === 200) {
-            //     console.log('Login successful!');
-            //     navigate('/home', {state: {user: loginData}});
+            console.log('Login successful!');
+            navigate('/home', {state: {user: response.data}}); // Pass all user data
             // }
+            navigate('/home', {state: {user: loginData}});
+
         } catch (error) {
             setError('Неверные логин или пароль');
             console.error('Login Error:', error);
