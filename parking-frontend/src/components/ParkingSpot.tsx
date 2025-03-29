@@ -1,5 +1,6 @@
 import {useState} from "react";
 import BookingModal from "./BookingModal.tsx";
+import { toast } from 'react-hot-toast';
 
 interface ParkingSpotProps {
     number: string;
@@ -20,15 +21,50 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
 
     };
 
-    const handleBook = (bookingDetails: {
+
+
+    const handlePurchase = async () => {
+        try {
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            console.log("Купили место", number);
+
+            // throw new Error("qe");
+            setIsOccupied(true);
+            setIsModalOpen(false);
+
+            toast.success(`Место ${number} успешно приобретено!`);
+        } catch (error) {
+            toast.error('Ошибка при покупке');
+            console.error("Purchase error:", error);
+        }
+    };
+
+    const handleBook = async (bookingDetails: {
         spot: string;
         start: string;
         end: string;
         price: string;
     }) => {
-        console.log("Бронь создана:", bookingDetails);
-        setIsOccupied(true);
-        setIsModalOpen(false);
+        try {
+            const loadingToast = toast.loading('Бронируем место...');
+
+            // Имитация API-запроса
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            console.log("Бронь создана:", bookingDetails);
+            setIsOccupied(true);
+            setIsModalOpen(false);
+
+            toast.success(`Место ${number} успешно забронировано!`, {
+                duration: 4000,
+            });
+        } catch (error) {
+            toast.error('Ошибка при бронировании');
+            console.error("Booking error:", error);
+        }
+        // Убрали finally с toast.dismiss()
     };
 
     return (
@@ -95,6 +131,7 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
                     onClose={() => setIsModalOpen(false)}
                     spotNumber={number}
                     onBook={handleBook}
+                    onPurchase={handlePurchase}
                 />
             </div>
         </>

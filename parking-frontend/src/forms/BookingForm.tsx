@@ -11,6 +11,9 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/ru';
 import duration from 'dayjs/plugin/duration';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { toast } from 'react-hot-toast';
+import {wait} from "@testing-library/user-event/dist/utils";
+
 
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
@@ -24,6 +27,7 @@ interface BookingFormProps {
         start: string;
         end: string;
         price: string;
+        car: string;
     }) => void;
 }
 
@@ -36,6 +40,7 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
         startDateTime: null as Dayjs | null,
         endDateTime: null as Dayjs | null,
         price: "0 ₽",
+        car: ""
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -53,6 +58,14 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
         }
         const hours = Math.ceil(durationHours);
         return `${hours * HOUR_RATE} ₽`;
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setBookingData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     const handleDateTimeChange = (name: 'startDateTime' | 'endDateTime', value: Dayjs | null) => {
@@ -73,32 +86,60 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
         e.preventDefault();
         setLoading(true);
 
-        if (!bookingData.startDateTime || !bookingData.endDateTime) {
-            setError('Укажите дату и время начала/окончания');
-            setLoading(false);
-            return;
-        }
+        // try {
+            // Валидация (остается без изменений)
+            if (!bookingData.startDateTime || !bookingData.endDateTime) {
+                setError('Укажите дату и время начала/окончания');
+                toast.error('Заполните все поля');
+                setLoading(false);
+                return;
+            }
 
-        if (bookingData.startDateTime.isAfter(bookingData.endDateTime)) {
-            setError('Дата окончания не может быть раньше даты начала');
-            setLoading(false);
-            return;
-        }
+            if (!bookingData.car) {
+                setError('Укажите номер машины');
+                toast.error('Введите номер автомобиля');
+                setLoading(false);
+                return;
+            }
 
-        if (bookingData.startDateTime.isSame(bookingData.endDateTime)) {
-            setError('Время бронирования должно быть больше 0');
-            setLoading(false);
-            return;
-        }
+            if (bookingData.startDateTime.isAfter(bookingData.endDateTime)) {
+                setError('Дата окончания не может быть раньше даты начала');
+                toast.error('Некорректные даты бронирования');
+                setLoading(false);
+                return;
+            }
 
-        const bookingDetails = {
-            spot: spotNumber,
-            start: bookingData.startDateTime.format('YYYY-MM-DD HH:mm'),
-            end: bookingData.endDateTime.format('YYYY-MM-DD HH:mm'),
-            price: bookingData.price,
-        };
+            if (bookingData.startDateTime.isSame(bookingData.endDateTime)) {
+                setError('Время бронирования должно быть больше 0');
+                toast.error('Минимальное время брони - 1 час');
+                setLoading(false);
+                return;
+            }
 
-        onBook(bookingDetails);
+            const bookingDetails = {
+                spot: spotNumber,
+                start: bookingData.startDateTime.format('YYYY-MM-DD HH:mm'),
+                end: bookingData.endDateTime.format('YYYY-MM-DD HH:mm'),
+                price: bookingData.price,
+                car: bookingData.car
+            };
+
+            // Показываем уведомление о начале бронирования
+            // const loadingToast = toast.loading('Идет бронирование...');
+
+
+            onBook(bookingDetails);
+
+
+            onClose();
+
+        // } catch (error) {
+        //     toast.error('Ошибка при бронировании. Попробуйте позже');
+        //     console.error('Booking error:', error);
+        // } finally {
+        //     toast.dismiss(); // Закрываем все тосты
+        //     setLoading(false);
+        // }
     };
 
     const durationText = useMemo(() => {
@@ -138,6 +179,17 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                         {error}
                     </Typography>
                 )}
+
+                <TextField
+                    label="Номер машины"
+                    variant="outlined"
+                    fullWidth
+                    name="car"
+                    value={bookingData.car}
+                    onChange={handleChange}
+                    required
+                    sx={{ mb: 2 }}
+                />
 
                 <DateTimePicker
                     label="Начало бронирования"
@@ -193,7 +245,7 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                         type="submit"
                         variant="contained"
                         fullWidth
-                        disabled={loading || bookingData.price === "0 ₽"}
+                        disabled={loading || bookingData.price === "0 ₽" || !bookingData.car}
                     >
                         {loading ? 'Обработка...' : 'Забронировать'}
                     </Button>
