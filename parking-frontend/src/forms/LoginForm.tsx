@@ -13,6 +13,10 @@ function LoginForm() {
         password: '',
     });
 
+    React.useEffect(() => {
+        window.history.replaceState({}, document.title);
+    }, []);
+
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();

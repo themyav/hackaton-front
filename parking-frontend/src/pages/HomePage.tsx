@@ -1,96 +1,140 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
 import {useNavigate, useLocation} from 'react-router-dom';
-import {TextField} from '@mui/material';
-import {formatPhone} from "../formatters/PhoneFormatter.ts";
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+
+const drawerWidth = 240;
+
+const navItems = [
+    {name: 'Главная', path: '/'},
+    {name: 'Карта', path: '/map'},
+    {name: 'Мои м/м', path: '/my-parkings'},
+    {name: 'Аренда', path: '/rent'},
+];
 
 function HomePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [user, setUser] = React.useState(location.state?.user || {phone: '', password: ''});
-    const [editMode, setEditMode] = React.useState(false);
+    const [user] = React.useState(location.state?.user || {phone: '', password: ''});
+    const [mobileOpen, setMobileOpen] = React.useState(false);
+
+    const handleDrawerToggle = () => {
+        setMobileOpen((prevState) => !prevState);
+    };
 
     const handleLogout = () => {
-        navigate('/login');
+        navigate('/login', {replace: true});
     };
 
-    const handleEditUser = () => {
-        setEditMode(true);
+    const handleEditProfile = () => {
+        navigate('/profile', {state: {user}});
     };
 
-    const handleSave = () => {
-        //API call
-        setEditMode(false);
-        console.log("User data saved:", user);
-    };
-
-    const handleCancel = () => {
-        setUser(location.state?.user || {phone: '', password: ''});
-        setEditMode(false);
-    };
-
-    const handleChange = (e) => {
-        const {name, value} = e.target;
-        if (name === "phone") {
-            setUser({...user, [name]: formatPhone(value)});
-        } else {
-            setUser({...user, [name]: value});
-        }
-    };
+    const drawer = (
+        <Box onClick={handleDrawerToggle} sx={{textAlign: 'center'}}>
+            <Typography variant="h6" sx={{my: 2}}>
+                Меню
+            </Typography>
+            <List>
+                {navItems.map((item) => (
+                    <ListItem key={item.name} disablePadding>
+                        <ListItemButton
+                            sx={{textAlign: 'center'}}
+                            onClick={() => navigate(item.path)}
+                        >
+                            <ListItemText primary={item.name}/>
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+            </List>
+        </Box>
+    );
 
     return (
-        <div style={{padding: '20px', maxWidth: '400px', margin: '0 auto'}}>
-            <h1>{"Добро пожаловать!"}</h1>
-
-            {editMode ? (
-                <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                    <TextField
-                        label="Номер телефона"
-                        variant="outlined"
-                        fullWidth
-                        name="phone"
-                        value={user.phone}
-                        onChange={handleChange}
-                        required
-                        placeholder="+7 XXX XXX XX XX"
-                    />
-                    <TextField
-                        label="Пароль"
-                        variant="outlined"
-                        fullWidth
-                        name="password"
-                        type="password"
-                        value={user.password}
-                        onChange={handleChange}
-                        required
-                    />
-                    <div style={{display: 'flex', gap: '10px'}}>
-                        <Button variant="contained" color="primary" onClick={handleSave}>
-                            Сохранить
-                        </Button>
-                        <Button variant="outlined" color="secondary" onClick={handleCancel}>
-                            Отмена
-                        </Button>
-                    </div>
-                </div>
-            ) : (
-                <div style={{marginBottom: '20px'}}>
+        <Box sx={{display: 'flex'}}>
+            <CssBaseline/>
+            <AppBar component="nav" position="fixed">
+                <Toolbar>
+                    <IconButton
+                        color="inherit"
+                        aria-label="open drawer"
+                        edge="start"
+                        onClick={handleDrawerToggle}
+                        sx={{mr: 2, display: {sm: 'none'}}}
+                    >
+                        <MenuIcon/>
+                    </IconButton>
+                    <Typography
+                        variant="h6"
+                        component="div"
+                        sx={{flexGrow: 1, display: {xs: 'none', sm: 'block'}}}
+                    >
+                        Парковки
+                    </Typography>
+                    <Box sx={{display: {xs: 'none', sm: 'flex'}}}>
+                        {navItems.map((item) => (
+                            <Button
+                                key={item.name}
+                                sx={{color: '#fff'}}
+                                onClick={() => navigate(item.path)}
+                            >
+                                {item.name}
+                            </Button>
+                        ))}
+                    </Box>
+                </Toolbar>
+            </AppBar>
+            <nav>
+                <Drawer
+                    variant="temporary"
+                    open={mobileOpen}
+                    onClose={handleDrawerToggle}
+                    ModalProps={{
+                        keepMounted: true,
+                    }}
+                    sx={{
+                        display: {xs: 'block', sm: 'none'},
+                        '& .MuiDrawer-paper': {boxSizing: 'border-box', width: drawerWidth},
+                    }}
+                >
+                    {drawer}
+                </Drawer>
+            </nav>
+            <Box component="main" sx={{p: 3, width: '100%', mt: 8}}>
+                <div style={{padding: '20px', maxWidth: '400px', margin: '0 auto'}}>
+                    <h1>Добро пожаловать!</h1>
                     <p><strong>Телефон:</strong> {user.phone}</p>
+
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleEditUser}
+                        onClick={handleEditProfile}
                         style={{margin: '10px 0'}}
                     >
                         Редактировать профиль
                     </Button>
-                </div>
-            )}
 
-            <Button variant="contained" color="primary" onClick={handleLogout}>
-                Выйти
-            </Button>
-        </div>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={handleLogout}
+                    >
+                        Выйти
+                    </Button>
+                </div>
+            </Box>
+        </Box>
     );
 }
 
