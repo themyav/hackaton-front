@@ -6,7 +6,7 @@ import StartPage from './pages/StartPage.tsx';
 import HomePage from "./pages/HomePage.tsx";
 import MyParkingsPage from "./pages/MyParkingsPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
-import RentPage from "./pages/RentPage.tsx";
+import ReportPage from "./pages/ReportPage.tsx";
 import MapPage from "./pages/MapPage.tsx";
 
 
@@ -15,12 +15,12 @@ function App() {
         <Router>
             <div className="App">
                 <Routes>
-                    <Route path="/" element={<StartPage/>}/>
+                    <Route path="/" element={<HomePage/>}/>
                     <Route path="/login" element={<StartPage/>}/>
                     <Route path="/home" element={<HomePage/>}/>
                     <Route path="/profile" element={<ProfilePage/>}/>
                     <Route path="/my-parkings" element={<MyParkingsPage/>}/>
-                    <Route path="/rent" element={<RentPage/>}/>
+                    <Route path="/reports" element={<ReportPage/>}/>
                     <Route path="/map" element={<MapPage/>}/>
 
                 </Routes>

@@ -9,7 +9,7 @@ import {formatPhone} from "../formatters/PhoneFormatter.ts";
 
 function LoginForm() {
     const [loginData, setLoginData] = useState({
-        phone: '',
+        phoneNumber: '',
         password: '',
     });
 
@@ -28,8 +28,11 @@ function LoginForm() {
 
         try {
             const response = await loginUser(loginData);
-            console.log('Login successful!');
-            navigate('/home', {state: {user: response.data}});
+            if (response.status === 200) {
+                console.log('Login successful!');
+                console.log(`${response.data.token}`)
+                navigate('/home', {state: {token: response.data.token, phoneNumber: loginData.phoneNumber}});
+            }
         } catch (error) {
             setError('Неверные логин или пароль');
             console.error('Login Error:', error);
@@ -40,9 +43,10 @@ function LoginForm() {
 
     const handleChange = (e) => {
         const {name, value} = e.target;
-        if (name === "phone") {
+        if (name === "phoneNumber") {
             setLoginData({...loginData, [name]: formatPhone(value)});
         } else {
+            console.log(name, value)
             setLoginData({...loginData, [name]: value});
         }
     };
@@ -55,8 +59,8 @@ function LoginForm() {
                 label="Номер телефона"
                 variant="outlined"
                 fullWidth
-                name="phone"
-                value={loginData.phone}
+                name="phoneNumber"
+                value={loginData.phoneNumber}
                 onChange={handleChange}
                 required
                 placeholder="+7 XXX XXX XX XX"

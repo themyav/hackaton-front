@@ -9,7 +9,7 @@ import {registerUser} from '../api/api.ts'; // Import the registerUser function
 
 function RegistrationForm() {
     const [registrationData, setRegistrationData] = useState({
-        phone: '',
+        phoneNumber: '',
         password: '',
         confirmPassword: ''
     });
@@ -24,7 +24,7 @@ function RegistrationForm() {
         setLoading(true); // Set loading to true before the request
 
         const phoneRegex = /^\+7 \d{3} \d{3} \d{2} \d{2}$/;
-        if (!phoneRegex.test(registrationData.phone)) {
+        if (!phoneRegex.test(registrationData.phoneNumber)) {
             setError('Неверный формат номера телефона. Используйте формат: +7 XXX XXX XX XX');
             setLoading(false); // Set loading to false if validation fails
             return;
@@ -37,19 +37,19 @@ function RegistrationForm() {
         }
 
         try {
-            const response = await registerUser(registrationData); // Use the imported function
-            // if (response.status === 200) {
-            //     setSuccessMessage('Регистрация прошла успешно!');
-            //     setregistrationData({
-            //         username: '',
-            //         email: '',
-            //         firstName: '',
-            //         lastName: '',
-            //         password: '',
-            //         confirmPassword: '',
-            //         phone: ''
-            //     });
-            // }
+            const response = await registerUser({
+                phoneNumber: registrationData.phoneNumber,
+                password: registrationData.password
+            });
+            if (response.status === 200) {
+                // const userId: string = response.data.userId;
+                setSuccessMessage(`Регистрация прошла успешно! Перейдите на страницу входа.`);
+                setRegistrationData({
+                    password: '',
+                    confirmPassword: '',
+                    phoneNumber: ''
+                });
+            }
         } catch (error) {
             setError('Ошибка регистрации. Попробуйте снова.');
             console.error('Registration error:', error);
@@ -60,7 +60,7 @@ function RegistrationForm() {
 
     const handleChange = (e) => {
         const {name, value} = e.target;
-        if (name === "phone") {
+        if (name === "phoneNumber") {
             setRegistrationData({...registrationData, [name]: formatPhone(value)});
         } else {
             setRegistrationData({...registrationData, [name]: value});
@@ -87,8 +87,8 @@ function RegistrationForm() {
                 label="Номер телефона"
                 variant="outlined"
                 fullWidth
-                name="phone"
-                value={registrationData.phone}
+                name="phoneNumber"
+                value={registrationData.phoneNumber}
                 onChange={handleChange}
                 required
                 placeholder="+7 XXX XXX XX XX"

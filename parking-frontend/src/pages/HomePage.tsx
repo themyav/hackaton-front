@@ -8,14 +8,14 @@ import {User} from '../interfaces/Interfaces.ts';
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const user = location.state?.user;
+    const user = location.state?.phoneNumber;
 
     const handleLogout = () => {
         navigate('/login');
     };
 
     const handleEditProfile = () => {
-        navigate('/profile', { state: { user } });
+        navigate('/profile', {state: {user}});
     };
 
     return (

@@ -28,7 +28,8 @@ const drawerWidth = 240;
 const navItems: NavItem[] = [
     {name: 'Главная', path: '/home'},
     {name: 'Карта', path: '/map'},
-    {name: 'Мои м/м', path: '/my-parkings'},
+    {name: 'Мои машино-места', path: '/my-parkings'},
+    {name: 'Отчеты', path: '/reports'}
 ];
 
 const NavBar: React.FC<NavBarProps> = ({children}) => {
@@ -81,7 +82,7 @@ const NavBar: React.FC<NavBarProps> = ({children}) => {
                         component="div"
                         sx={{flexGrow: 1, display: {xs: 'none', sm: 'block'}}}
                     >
-                        Парковки
+                        Управление парковкой
                     </Typography>
                     <Box sx={{display: {xs: 'none', sm: 'flex'}}}>
                         {navItems.map((item) => (
