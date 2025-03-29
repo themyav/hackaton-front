@@ -2,18 +2,20 @@ import ParkingSpot from "../ParkingSpot/index.tsx";
 import {ParkingAngle, getGapByAngle} from "../../constants/parkingAngles.ts";
 
 interface ParkingRowProps {
+    first: number
     spots: number;
     angle?: ParkingAngle;
 }
 
 const ParkingRow: React.FC<ParkingRowProps> = ({
+                                                   first,
                                                    spots,
                                                    angle = ParkingAngle.Angle0,
                                                }) => {
     const gap = getGapByAngle(angle);
     let content = [];
-    for (let i = 0; i < spots; i++) {
-        i == spots - 1
+    for (let i = first; i < first + spots; i++) {
+        i == first+spots - 1
             ? content.push(
                 <ParkingSpot isDisabled={true} angle={angle} number={String(i)}/>
             )

@@ -21,6 +21,17 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
         <>
             <style>
                 {`
+                
+.disabledIcon {
+    position: absolute;
+    top: 5px;       /* Прижат к верхнему краю */
+    left: 5px;      /* Прижат к левому краю */
+    font-size: 20px;
+    transform: none; /* Отключаем поворот */
+    z-index: 1; 
+}
+
+
 .spot {
     width: 60px;
     height: 100px;
@@ -34,6 +45,14 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
     position: relative; /* Для позиционирования иконки */
     transition: background-color 0.3s ease;
 }
+
+.spotNumber {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
 .disabled {
     background-color: #add8e6; /* Светло-голубой цвет для мест для инвалидов */
 }
@@ -42,28 +61,44 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
     background-color: grey;
 }
 
-.disabledIcon {
-    position:absolute;
-    bottom: 5px;
-    right: 5px;
-    font-size: 20px;
-}
         `}
 
             </style>
 
 
-            <div
-                // className={`${styles.spot} ${isOccupied ? styles.occupied : ""} ${
-                //     isDisabled ? styles.disabled : ""
-                // }`}
+            {/*<div*/}
+            {/*    className={[*/}
+            {/*        "spot",*/}
+            {/*        isOccupied && "occupied",*/}
+            {/*        isDisabled && "disabled"*/}
+            {/*    ].filter(Boolean).join(" ")}*/}
 
-                className="spot"
-                onClick={toggleOccupied}
-                style={{transform: `rotate(${angle}deg)`}}
-            >
-                <span style={{transform: `rotate(${-angle}deg)`}}>{number}</span>
-                {isDisabled && <div className="disabledIcon">♿</div>}
+            {/*    onClick={toggleOccupied}*/}
+            {/*    style={{transform: `rotate(${angle}deg)`}}*/}
+            {/*>*/}
+            {/*    <span style={{transform: `rotate(${-angle}deg)`}}>{number}</span>*/}
+            {/*    {isDisabled && <div className="disabledIcon" style={{transform: `rotate(${-angle}deg)`}}>♿</div>}*/}
+            {/*</div>*/}
+            <div style={{position: "relative", width: "60px", height: "100px"}}>
+                <div
+                    className={[
+                        "spot",
+                        isOccupied && "occupied",
+                        isDisabled && "disabled"
+                    ].filter(Boolean).join(" ")}
+                    onClick={toggleOccupied}
+                    style={{transform: `rotate(${angle}deg)`}}
+                />
+
+                <span className="spotNumber">
+    {number}
+  </span>
+
+                {isDisabled && (
+                    <div className="disabledIcon">
+                    ♿
+                    </div>
+                )}
             </div>
         </>
     );
