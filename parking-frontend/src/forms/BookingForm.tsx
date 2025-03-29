@@ -12,7 +12,6 @@ import 'dayjs/locale/ru';
 import duration from 'dayjs/plugin/duration';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { toast } from 'react-hot-toast';
-import {wait} from "@testing-library/user-event/dist/utils";
 
 
 dayjs.extend(duration);
@@ -123,23 +122,9 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                 price: bookingData.price,
                 car: bookingData.car
             };
-
-            // Показываем уведомление о начале бронирования
-            // const loadingToast = toast.loading('Идет бронирование...');
-
-
             onBook(bookingDetails);
-
-
             onClose();
 
-        // } catch (error) {
-        //     toast.error('Ошибка при бронировании. Попробуйте позже');
-        //     console.error('Booking error:', error);
-        // } finally {
-        //     toast.dismiss(); // Закрываем все тосты
-        //     setLoading(false);
-        // }
     };
 
     const durationText = useMemo(() => {
