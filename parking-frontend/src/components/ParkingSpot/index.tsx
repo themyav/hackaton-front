@@ -65,20 +65,6 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
 
             </style>
 
-
-            {/*<div*/}
-            {/*    className={[*/}
-            {/*        "spot",*/}
-            {/*        isOccupied && "occupied",*/}
-            {/*        isDisabled && "disabled"*/}
-            {/*    ].filter(Boolean).join(" ")}*/}
-
-            {/*    onClick={toggleOccupied}*/}
-            {/*    style={{transform: `rotate(${angle}deg)`}}*/}
-            {/*>*/}
-            {/*    <span style={{transform: `rotate(${-angle}deg)`}}>{number}</span>*/}
-            {/*    {isDisabled && <div className="disabledIcon" style={{transform: `rotate(${-angle}deg)`}}>♿</div>}*/}
-            {/*</div>*/}
             <div style={{position: "relative", width: "60px", height: "100px"}}>
                 <div
                     className={[
@@ -90,15 +76,8 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
                     style={{transform: `rotate(${angle}deg)`}}
                 />
 
-                <span className="spotNumber">
-    {number}
-  </span>
-
-                {isDisabled && (
-                    <div className="disabledIcon">
-                    ♿
-                    </div>
-                )}
+                <span className="spotNumber">{number}</span>
+                {isDisabled && (<div className="disabledIcon">♿</div>)}
             </div>
         </>
     );

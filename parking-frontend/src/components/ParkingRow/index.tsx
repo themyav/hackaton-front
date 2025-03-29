@@ -5,12 +5,14 @@ interface ParkingRowProps {
     first: number
     spots: number;
     angle?: ParkingAngle;
+    style?: React.CSSProperties;
 }
 
 const ParkingRow: React.FC<ParkingRowProps> = ({
                                                    first,
                                                    spots,
                                                    angle = ParkingAngle.Angle0,
+                                                   style
                                                }) => {
     const gap = getGapByAngle(angle);
     let content = [];
@@ -31,7 +33,7 @@ const ParkingRow: React.FC<ParkingRowProps> = ({
 }
         `}
             </style>
-            <div className="row" style={{gap: `${gap}px`}}>
+            <div className="row"  style={{ gap: `${gap}px`, ...style }}>
                 {content}
             </div>
         </>
