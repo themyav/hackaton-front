@@ -1,13 +1,16 @@
 import * as React from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import NavBar from '../navigation/NavBar.tsx';
+import {User} from "../interfaces/Interfaces";
 
 
 function RentPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const user: User = location.state?.user;
 
     return (
         <NavBar>
@@ -16,7 +19,7 @@ function RentPage() {
                     Аренда парковки
                 </Typography>
                 <Typography>
-                    Аренда парковочного места ИЛИ сдача своего авто в аренду
+                    Аренда парковочного места ИЛИ сдача своего авто в аренду, пользователь {user?.phone}
                 </Typography>
                 <Button
                     variant="contained"

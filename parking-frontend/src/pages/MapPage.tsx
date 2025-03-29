@@ -1,8 +1,13 @@
 import ParkingRow from "../components/ParkingRow/index.tsx"
 import NavBar from "../navigation/NavBar.tsx";
+import {useLocation} from "react-router-dom";
+import {User} from "../interfaces/Interfaces";
 
 
 const MapPage = () => {
+    const location = useLocation();
+    const user: User = location.state?.user;
+
     let num = 1
     let flag = false
     const generateParkingRows = (rowsCount: number, spotsPerRow: number) => {
@@ -31,6 +36,7 @@ const MapPage = () => {
 
     return (
         <NavBar>
+            <p>Карта пользователя {user?.phone}</p>
             <style>
                 {`
  .parkingMap {

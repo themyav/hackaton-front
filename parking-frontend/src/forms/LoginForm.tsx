@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import {useState} from 'react';
 import {loginUser} from '../api/api.ts';
 import {useNavigate} from 'react-router-dom';
-import {formStyle} from '../styles/FormStyle.tsx'
+import {formStyle} from '../styles/FormStyle.tsx';
 import {formatPhone} from "../formatters/PhoneFormatter.ts";
 
 function LoginForm() {
@@ -28,12 +28,8 @@ function LoginForm() {
 
         try {
             const response = await loginUser(loginData);
-            // if (response.status === 200) {
             console.log('Login successful!');
-            navigate('/home', {state: {user: response.data}}); // Pass all user data
-            // }
-            navigate('/home', {state: {user: loginData}});
-
+            navigate('/home', {state: {user: response.data}});
         } catch (error) {
             setError('Неверные логин или пароль');
             console.error('Login Error:', error);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -19,11 +19,6 @@ interface NavItem {
     path: string;
 }
 
-// interface NavBarProps {
-//     children: React.ReactNode;
-//     user?: User; // Make it optional if not all pages need it
-// }
-
 interface NavBarProps {
     children: React.ReactNode;
 }
@@ -39,6 +34,9 @@ const navItems: NavItem[] = [
 
 const NavBar: React.FC<NavBarProps> = ({children}) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const user = location.state?.user;
+
     const [mobileOpen, setMobileOpen] = React.useState(false);
 
     const handleDrawerToggle = () => {
@@ -55,7 +53,7 @@ const NavBar: React.FC<NavBarProps> = ({children}) => {
                     <ListItem key={item.name} disablePadding>
                         <ListItemButton
                             sx={{textAlign: 'center'}}
-                            onClick={() => navigate(item.path)}
+                            onClick={() => navigate(item.path, {state: {user}})}
                         >
                             <ListItemText primary={item.name}/>
                         </ListItemButton>
@@ -91,7 +89,7 @@ const NavBar: React.FC<NavBarProps> = ({children}) => {
                             <Button
                                 key={item.name}
                                 sx={{color: '#fff'}}
-                                onClick={() => navigate(item.path)}
+                                onClick={() => navigate(item.path, {state: {user}})}
                             >
                                 {item.name}
                             </Button>
