@@ -29,7 +29,7 @@ function App() {
             <Router>
                 <div className="App">
                     <Routes>
-                        <Route path="/" element={<MapPage/>}/>
+                        <Route path="/" element={<StartPage/>}/>
                         <Route path="/login" element={<StartPage/>}/>
                         <Route path="/home" element={<HomePage/>}/>
                         <Route path="/profile" element={<ProfilePage/>}/>
@@ -37,7 +37,7 @@ function App() {
                         <Route path="/reports" element={<ReportPage/>}/>
                         <Route path="/map" element={<MapPage/>}/>
                     </Routes>
-                    </div>
+                </div>
             </Router>
         </>
     );
