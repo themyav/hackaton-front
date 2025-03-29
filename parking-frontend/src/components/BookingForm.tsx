@@ -16,23 +16,26 @@ dayjs.extend(duration);
 dayjs.extend(customParseFormat);
 dayjs.locale('ru');
 
-interface BookingData {
-    startDateTime: Dayjs | null;
-    endDateTime: Dayjs | null;
-    price: string;
+interface BookingFormProps {
     spotNumber: string;
+    onClose: () => void;
+    onBook: (bookingDetails: {
+        spot: string;
+        start: string;
+        end: string;
+        price: string;
+    }) => void;
 }
 
-const HOUR_RATE = 100; // 100 руб/час
-const DAY_RATE = 1500; // 1500 руб/день
+const HOUR_RATE = 100;
+const DAY_RATE = 1500;
 const MIN_BOOKING_HOURS = 1;
 
-const BookingForm = () => {
-    const [bookingData, setBookingData] = useState<BookingData>({
-        startDateTime: null,
-        endDateTime: null,
+const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
+    const [bookingData, setBookingData] = useState({
+        startDateTime: null as Dayjs | null,
+        endDateTime: null as Dayjs | null,
         price: "0 ₽",
-        spotNumber: "A-12"
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -43,21 +46,16 @@ const BookingForm = () => {
         const durationHours = end.diff(start, 'hour', true);
         const durationDays = end.diff(start, 'day', true);
 
-        // Минимальное время брони - 1 час
         if (durationHours < MIN_BOOKING_HOURS) return "0 ₽";
-
-        // Если бронь больше 6 часов - выгоднее считать по дневному тарифу
         if (durationHours >= 6) {
             const days = Math.ceil(durationDays);
             return `${days * DAY_RATE} ₽`;
         }
-
-        // Почасовой расчет
         const hours = Math.ceil(durationHours);
         return `${hours * HOUR_RATE} ₽`;
     };
 
-    const handleDateTimeChange = (name: keyof BookingData, value: Dayjs | null) => {
+    const handleDateTimeChange = (name: 'startDateTime' | 'endDateTime', value: Dayjs | null) => {
         const newData = {
             ...bookingData,
             [name]: value
@@ -65,7 +63,6 @@ const BookingForm = () => {
 
         setBookingData(newData);
 
-        // Пересчет цены при изменении дат
         if (name === 'startDateTime' || name === 'endDateTime') {
             const price = calculatePrice(newData.startDateTime, newData.endDateTime);
             setBookingData(prev => ({ ...prev, price }));
@@ -95,19 +92,13 @@ const BookingForm = () => {
         }
 
         const bookingDetails = {
-            spot: bookingData.spotNumber,
+            spot: spotNumber,
             start: bookingData.startDateTime.format('YYYY-MM-DD HH:mm'),
             end: bookingData.endDateTime.format('YYYY-MM-DD HH:mm'),
             price: bookingData.price,
-            duration: bookingData.endDateTime.diff(bookingData.startDateTime, 'minute')
         };
 
-        console.log('Данные бронирования:', bookingDetails);
-
-        setTimeout(() => {
-            setLoading(false);
-            alert(`Бронь успешно создана! Стоимость: ${bookingData.price}`);
-        }, 1000);
+        onBook(bookingDetails);
     };
 
     const durationText = useMemo(() => {
@@ -139,18 +130,12 @@ const BookingForm = () => {
                 }}
             >
                 <Typography variant="h6" align="center">
-                    Бронирование парковочного места
+                    Бронирование места {spotNumber}
                 </Typography>
 
                 {error && (
                     <Typography color="error" align="center">
                         {error}
-                    </Typography>
-                )}
-
-                {loading && (
-                    <Typography color="text.secondary" align="center">
-                        Обработка запроса...
                     </Typography>
                 )}
 
@@ -190,28 +175,29 @@ const BookingForm = () => {
                 />
 
                 <TextField
-                    label="Номер парковочного места"
-                    value={bookingData.spotNumber}
-                    InputProps={{ readOnly: true }}
-                    fullWidth
-                />
-
-                <TextField
                     label="Стоимость"
                     value={bookingData.price}
                     InputProps={{ readOnly: true }}
                     fullWidth
                 />
 
-                <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    disabled={loading || bookingData.price === "0 ₽"}
-                    sx={{ mt: 2 }}
-                >
-                    Забронировать
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={onClose}
+                    >
+                        Отмена
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        disabled={loading || bookingData.price === "0 ₽"}
+                    >
+                        {loading ? 'Обработка...' : 'Забронировать'}
+                    </Button>
+                </Box>
             </Box>
         </LocalizationProvider>
     );

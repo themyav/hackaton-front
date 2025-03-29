@@ -1,5 +1,5 @@
-import ParkingSpot from "../ParkingSpot/index.tsx";
-import {ParkingAngle, getGapByAngle} from "../../constants/parkingAngles.ts";
+import ParkingSpot from "./ParkingSpot.tsx";
+import {ParkingAngle, getGapByAngle} from "../constants/parkingAngles.ts";
 
 interface ParkingRowProps {
     first: number

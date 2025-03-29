@@ -29,7 +29,6 @@ const navItems: NavItem[] = [
     {name: 'Главная', path: '/home'},
     {name: 'Карта', path: '/map'},
     {name: 'Мои м/м', path: '/my-parkings'},
-    {name: 'Аренда', path: '/rent'},
 ];
 
 const NavBar: React.FC<NavBarProps> = ({children}) => {

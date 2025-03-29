@@ -1,4 +1,4 @@
-import ParkingRow from "../components/ParkingRow/index.tsx"
+import ParkingRow from "../components/ParkingRow.tsx"
 import NavBar from "../navigation/NavBar.tsx";
 import {useLocation} from "react-router-dom";
 import {User} from "../interfaces/Interfaces";
