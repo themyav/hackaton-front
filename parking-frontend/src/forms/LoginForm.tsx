@@ -5,10 +5,11 @@ import {useState} from 'react';
 import {loginUser} from '../api/api.ts';
 import {useNavigate} from 'react-router-dom';
 import {formStyle} from '../styles/FormStyle.tsx'
+import {formatPhone} from "../formatters/PhoneFormatter.ts";
 
 function LoginForm() {
     const [loginData, setLoginData] = useState({
-        username: '',
+        phone: '',
         password: '',
     });
 
@@ -37,7 +38,11 @@ function LoginForm() {
 
     const handleChange = (e) => {
         const {name, value} = e.target;
-        setLoginData({...loginData, [name]: value});
+        if (name === "phone") {
+            setLoginData({...loginData, [name]: formatPhone(value)});
+        } else {
+            setLoginData({...loginData, [name]: value});
+        }
     };
 
     return (
@@ -45,13 +50,14 @@ function LoginForm() {
             {error && <div style={{color: 'red', textAlign: 'center', marginBottom: '10px'}}>{error}</div>}
             {loading && <div style={{color: 'gray', textAlign: 'center', marginBottom: '10px'}}>Подождите...</div>}
             <TextField
-                label="Логин"
+                label="Номер телефона"
                 variant="outlined"
                 fullWidth
-                name="username"
-                value={loginData.username}
+                name="phone"
+                value={loginData.phone}
                 onChange={handleChange}
                 required
+                placeholder="+7 XXX XXX XX XX"
             />
             <TextField
                 label="Пароль"
