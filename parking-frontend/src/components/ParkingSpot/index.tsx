@@ -34,7 +34,7 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
 
 .spot {
     width: 60px;
-    height: 100px;
+    height: 90px;
     color: black;
     display: flex;
     align-items: center;
