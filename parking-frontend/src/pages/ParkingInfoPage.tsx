@@ -11,7 +11,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
-import {CombinedParkingInfo} from './MyParkingsPage';
+import {CombinedParkingInfo} from './MyParkingsPage.tsx';
 import {changeCarNumberForArendator, changeCarNumberForOwner} from "../api/api.ts";
 
 const ParkingInfoPage: React.FC = () => {
@@ -44,14 +44,17 @@ const ParkingInfoPage: React.FC = () => {
         try {
             if (parkingInfo.isOwned) {
                 // Запрос для владельца
-                let response = await changeCarNumberForOwner(parkingInfo);
+                let response = await changeCarNumberForOwner({
+                    number: parkingInfo.number,
+                    ownerVehicle: vehicle
+                });
                 if (response.status === 200) {
                     console.log("status changed succesfully")
                 } else {
                     console.log("Problems with status change")
                 }
             } else if (parkingInfo.isBooked) {
-                let response = await changeCarNumberForArendator({bookingId: 1, vehicle: parkingInfo.vehicle});
+                let response = await changeCarNumberForArendator({bookingId: 1, ownerVehicle: vehicle});
                 if (response.status === 200) {
                     console.log("status changed succesfully")
                 } else {

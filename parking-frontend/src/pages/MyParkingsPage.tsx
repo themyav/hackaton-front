@@ -17,7 +17,6 @@ import {useEffect, useState} from 'react';
 import {Tooltip} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from '@mui/icons-material/Info';
-import {tableStyle} from "../styles/TableStyle.tsx";
 
 
 interface ParkingData {
@@ -47,7 +46,7 @@ interface ParkingData {
     total: string;
 }
 
-interface CombinedParkingInfo {
+export interface CombinedParkingInfo {
     number: string;
     kind: string;
     type: string;
@@ -76,12 +75,12 @@ const MyParkingsPage: React.FC = () => {
                 if (!user?.id) return;
 
                 const response = await getParkingSpotList(user.id);
+                console.log('Responce data is: ', response.data)
                 setParkingData(response.data);
 
                 const combined: CombinedParkingInfo[] = [];
 
                 response.data.parkingLots
-                    .filter(lot => lot.ownerId === user.id)
                     .forEach(lot => {
                         combined.push({
                             number: lot.number,

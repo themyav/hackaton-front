@@ -51,11 +51,12 @@ export const updateUser = async (user) => {
     }
 }
 
-export const getParkingSpotList = async (user: String) => {
+export const getParkingSpotList = async (userId: String) => {
     try {
-        const responce = await axios.get(`${BASE_URL}/parking/list`, {
+        console.log('Request is: ', userId)
+        const responce = await axios.get(`${BASE_URL}/my/parking/list`, {
             params: {
-                userId: `${user}`
+                "filter.ownerId": `${userId}`
             }
         });
         console.log(responce)
@@ -108,6 +109,7 @@ export const getSpotsByOwnerId = async (id: String) => {
 }
 
 export const changeCarNumberForOwner = async (parking) => {
+    console.log("Request is ", parking)
     try {
         return await axios.post(`${BASE_URL}/parking/update`, parking);
     } catch (error) {
@@ -133,6 +135,34 @@ export const getRentalBySpotId = async (id: number) => {
         });
         console.log(responce)
         return responce
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+export const getAllMyBookings = async (ownerId, timeFrom, timeTo) => {
+    try {
+        return await axios.get(`${BASE_URL}/booking/list`, {
+            params: {
+                "filter.ownerId": `${ownerId}`,
+                "filter.timeFrom": `${timeFrom}`,
+                "filter.timeTo": `${timeTo}`
+            }
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getAllOwnedPlaces = async (id) => {
+    console.log("Going to send id with UID ", id)
+    try {
+        return await axios.get(`${BASE_URL}/parking/get_by_user_id`, {
+            params: {
+                userId: `${id}`
+            }
+        });
     } catch (error) {
         throw error;
     }
