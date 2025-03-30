@@ -11,12 +11,19 @@ import NavBar from "../navigation/NavBar.tsx";
 function ProfilePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [user, setUser] = React.useState(location.state?.user || {phone: '', password: ''});
+    const [user, setUser] = React.useState(location.state?.user || {
+        id: '',
+        phoneNumber: '',
+        user_type: '',
+        name: '',
+        surname: '',
+        patronimic: ''
+    });
 
     const handleSave = () => {
         // API call would go here
         console.log("User data saved:", user);
-        navigate(-1); // Go back to previous page
+        // navigate(-1); // Go back to previous page
     };
 
     const handleCancel = () => {
@@ -27,6 +34,11 @@ function ProfilePage() {
         const {name, value} = e.target;
         setUser({...user, [name]: value});
     };
+
+    const handleUserType = (t) => {
+        if (t == "REGULAR_USER_TYPE") return "Жилец"
+        else return "Привилегированный"
+    }
 
     return (
         <NavBar>
@@ -43,18 +55,40 @@ function ProfilePage() {
                         label="Номер телефона"
                         variant="outlined"
                         fullWidth
-                        name="phone"
-                        value={user.phone}
-                        onChange={handleChange}
+                        name="phoneNumber"
+                        value={user.phoneNumber}
                         disabled
                     />
                     <TextField
-                        label="Пароль"
+                        label="Тип пользователя"
                         variant="outlined"
                         fullWidth
-                        name="password"
-                        type="password"
-                        value={user.password}
+                        name="user_type"
+                        value={handleUserType(user.userType)}
+                        disabled
+                    />
+                    <TextField
+                        label="Имя"
+                        variant="outlined"
+                        fullWidth
+                        name="name"
+                        value={user.name}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        label="Фамилия"
+                        variant="outlined"
+                        fullWidth
+                        name="surname"
+                        value={user.surname}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        label="Отчество"
+                        variant="outlined"
+                        fullWidth
+                        name="patronimic"
+                        value={user.patronimic}
                         onChange={handleChange}
                     />
 
