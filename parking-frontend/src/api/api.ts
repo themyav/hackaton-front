@@ -76,6 +76,37 @@ export const addBooking = async (userData) => {
     }
 }
 
+
+
+export const getUserByPhone = async (phone: String) => {
+    try {
+        const responce = await axios.get(`${BASE_URL}/user/get_by_phone`, {
+            params: {
+                phoneNumber: `${phone}`
+            }
+        });
+        console.log(responce)
+        return responce
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+export const getSpotsByOwnerId = async (id: String) => {
+    try {
+        const responce = await axios.get(`${BASE_URL}/my/parking/list`, {
+            params: {
+                ownerId: `${id}`
+            }
+        });
+        console.log(responce)
+        return responce
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const changeCarNumberForOwner = async (parking) => {
     try {
         return await axios.post(`${BASE_URL}/parking/update`, parking);
@@ -87,6 +118,21 @@ export const changeCarNumberForOwner = async (parking) => {
 export const changeCarNumberForArendator = async (booking) => {
     try {
         return await axios.post(`${BASE_URL}/booking/edit`, booking);
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+export const getRentalBySpotId = async (id: number) => {
+    try {
+        const responce = await axios.get(`${BASE_URL}/rental/get`, {
+            params: {
+                ownerId: `${id}`
+            }
+        });
+        console.log(responce)
+        return responce
     } catch (error) {
         throw error;
     }

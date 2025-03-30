@@ -13,7 +13,7 @@ import duration from 'dayjs/plugin/duration';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import {toast} from 'react-hot-toast';
 import {useLocation} from "react-router-dom";
-
+import {getUserByPhone, getRentalBySpotId} from "../api/api.ts"
 
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
@@ -27,23 +27,54 @@ interface BookingFormProps {
         start: string;
         end: string;
         vehicle: string;
+        userId: string;
+        number: string;
+        rentalId?: string;
     }) => void;
 }
 
-
-const BookingForm = ({onClose, onBook}: BookingFormProps) => {
+const BookingForm = ({onClose, onBook, number, userId}: BookingFormProps) => {
     const [bookingData, setBookingData] = useState({
         startDateTime: null as Dayjs | null,
         endDateTime: null as Dayjs | null,
-        number: "",
-        vehicle: null,
-        userId: "",
+        vehicle: "",
+        userId: userId,
+        phone: "",
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const location = useLocation();
     const user = location.state?.user;
+
+    const handlePhone = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = e.target;
+        const cleanedPhone = value.replace(/\D/g, '');
+
+        setBookingData(prev => ({
+            ...prev,
+            phone: value
+        }));
+
+        if (cleanedPhone.length >= 11) {
+            try {
+                const response = await getUserByPhone(cleanedPhone);
+
+                if (response.data?.user) {
+                    setBookingData(prev => ({
+                        ...prev,
+                        userId: response.data.user.id
+                    }));
+                    toast.success(`Пользователь ${response.data.user.name} найден`);
+                } else {
+                    toast.error('Пользователь с таким номером не найден');
+                }
+            } catch (error) {
+                console.error('Ошибка поиска пользователя:', error);
+                toast.error('Ошибка при поиске пользователя');
+            }
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -54,57 +85,63 @@ const BookingForm = ({onClose, onBook}: BookingFormProps) => {
     };
 
     const handleDateTimeChange = (name: 'startDateTime' | 'endDateTime', value: Dayjs | null) => {
-        const newData = {
-            ...bookingData,
+        setBookingData(prev => ({
+            ...prev,
             [name]: value
-        };
-        setBookingData(newData);
+        }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
 
-        // try {
-        // Валидация (остается без изменений)
-        if (!bookingData.startDateTime || !bookingData.endDateTime) {
-            setError('Укажите дату и время начала/окончания');
-            toast.error('Заполните все поля');
+        try {
+            if (!bookingData.startDateTime || !bookingData.endDateTime) {
+                throw new Error('Укажите дату и время начала/окончания');
+            }
+
+            if (!bookingData.vehicle) {
+                throw new Error('Укажите номер машины');
+            }
+
+            if (bookingData.startDateTime.isAfter(bookingData.endDateTime)) {
+                throw new Error('Дата окончания не может быть раньше даты начала');
+            }
+
+            if (bookingData.startDateTime.isSame(bookingData.endDateTime)) {
+                throw new Error('Время бронирования должно быть больше 0');
+            }
+
+            const currentUserId = user?.userType === "REGULAR_USER_TYPE" ? user.id : bookingData.userId;
+
+            // Получаем rentalId асинхронно
+            let rentalId = '';
+            try {
+                const rentalResponse = await getRentalBySpotId(number);
+                rentalId = rentalResponse.data?.rentalId || '';
+            } catch (error) {
+                console.error('Ошибка получения rentalId:', error);
+            }
+
+            const bookingDetails = {
+                start: bookingData.startDateTime.toISOString(),
+                end: bookingData.endDateTime.toISOString(),
+                vehicle: bookingData.vehicle,
+                userId: currentUserId,
+                number: number,
+                ...(rentalId && { rentalId }) // Добавляем rentalId только если он есть
+            };
+
+            onBook(bookingDetails);
+            onClose();
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Произошла ошибка';
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
             setLoading(false);
-            return;
         }
-
-        if (!bookingData.vehicle) {
-            setError('Укажите номер машины');
-            toast.error('Введите номер автомобиля');
-            setLoading(false);
-            return;
-        }
-
-        if (bookingData.startDateTime.isAfter(bookingData.endDateTime)) {
-            setError('Дата окончания не может быть раньше даты начала');
-            toast.error('Некорректные даты бронирования');
-            setLoading(false);
-            return;
-        }
-
-        if (bookingData.startDateTime.isSame(bookingData.endDateTime)) {
-            setError('Время бронирования должно быть больше 0');
-            toast.error('Минимальное время брони - 1 час');
-            setLoading(false);
-            return;
-        }
-
-        const bookingDetails = {
-            number: bookingData.number,
-            start: bookingData.startDateTime.format('YYYY-MM-DD HH:mm'),
-            end: bookingData.endDateTime.format('YYYY-MM-DD HH:mm'),
-            userId: bookingData.userId,
-            vehicle: bookingData.vehicle
-        };
-        onBook(bookingDetails);
-        onClose();
-
     };
 
     const durationText = useMemo(() => {
@@ -136,7 +173,7 @@ const BookingForm = ({onClose, onBook}: BookingFormProps) => {
                 }}
             >
                 <Typography variant="h6" align="center">
-                    Бронирование места {}
+                    Бронирование места {number}
                 </Typography>
 
                 {error && (
@@ -145,10 +182,11 @@ const BookingForm = ({onClose, onBook}: BookingFormProps) => {
                     </Typography>
                 )}
 
-
                 <TextField
                     label="Номер машины"
+                    name="vehicle"
                     value={bookingData.vehicle}
+                    onChange={handleChange}
                     fullWidth
                     required
                     sx={{mb: 2}}
@@ -181,6 +219,7 @@ const BookingForm = ({onClose, onBook}: BookingFormProps) => {
                     minDateTime={bookingData.startDateTime || dayjs()}
                     format="DD.MM.YYYY HH:mm"
                 />
+
                 <TextField
                     label="Длительность брони"
                     value={durationText || '—'}
@@ -188,29 +227,22 @@ const BookingForm = ({onClose, onBook}: BookingFormProps) => {
                     fullWidth
                 />
 
-                {user.userType === "REGULAR_USER_TYPE" &&
+                {user?.userType === "ADMINISTRATOR_USER_TYPE" && (
                     <TextField
-                        label="Пользователь"
-                        value={user.id}
-                        InputProps={{readOnly: true}}
+                        label="Телефон пользователя"
+                        value={bookingData.phone}
+                        onChange={handlePhone}
+                        placeholder="+7 (XXX) XXX-XX-XX"
                         fullWidth
                     />
-                }
-
-                {user.userType === "ADMINISTRATOR_USER_TYPE" &&
-                    <TextField
-                        label="Пользователь"
-                        value={bookingData.userId}
-                        fullWidth
-                    />
-                }
-
+                )}
 
                 <Box sx={{display: 'flex', gap: 2}}>
                     <Button
                         variant="outlined"
                         fullWidth
                         onClick={onClose}
+                        disabled={loading}
                     >
                         Отмена
                     </Button>
@@ -218,7 +250,7 @@ const BookingForm = ({onClose, onBook}: BookingFormProps) => {
                         type="submit"
                         variant="contained"
                         fullWidth
-                        disabled={loading || !bookingData.vehicle}
+                        disabled={loading}
                     >
                         {loading ? 'Обработка...' : 'Забронировать'}
                     </Button>

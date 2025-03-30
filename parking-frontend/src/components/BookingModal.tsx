@@ -28,6 +28,10 @@ interface BookingModalProps {
     onBook: (bookingDetails: {
         start: string;
         end: string;
+        vehicle: string;
+        userId: string;
+        number: string
+        rentalId: string
     }) => void;
     onPurchase?: () => void;
     status: string

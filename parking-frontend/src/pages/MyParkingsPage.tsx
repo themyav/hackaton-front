@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import NavBar from '../navigation/NavBar.tsx';
 import Box from '@mui/material/Box';
-import {getMyParkingList} from '../api/api.ts'; // Предполагается, что функция находится здесь
+import {getParkingSpotList} from '../api/api.ts'; // Предполагается, что функция находится здесь
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -75,7 +75,7 @@ const MyParkingsPage: React.FC = () => {
             try {
                 if (!user?.id) return;
 
-                const response = await getMyParkingList(user.id);
+                const response = await getParkingSpotList(user.id);
                 setParkingData(response.data);
 
                 const combined: CombinedParkingInfo[] = [];

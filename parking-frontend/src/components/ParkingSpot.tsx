@@ -1,10 +1,11 @@
 // ParkingSpot.tsx
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import BookingModal from "./BookingModal.tsx";
 import {toast} from 'react-hot-toast';
 import {ParkingSpotKinds, ParkingSpotStatus, ParkingSpotType} from "../constants/enum.ts";
-import {addBooking} from "../api/api.ts"
+import {addBooking, getParkingSpotList, getSpotsByOwnerId} from "../api/api.ts"
 import {useLocation} from "react-router-dom";
+import dayjs from "dayjs";
 
 // ParkingSpot.tsx
 interface ParkingSpotProps {
@@ -17,6 +18,124 @@ interface ParkingSpotProps {
     angle?: number;
 }
 
+
+interface ParkingLot {
+    number: string;
+    kind: string;
+    type: string;
+    status: string;
+    vehicle: string;
+    ownerId: string;
+}
+
+interface Booking {
+    userId: string;
+    parkingLot: string;
+    vehicle: string;
+    timeFrom: string;
+    timeTo: string;
+    bookingId: string;
+}
+
+interface Rental {
+    rentalId: string;
+    parkingLot: string;
+    timeFrom: string;
+    timeTo: string;
+    costPerHour: string;
+    costPerDay: string;
+}
+
+interface ApiResponse {
+    bookings: Booking[];
+    rentals: Rental[];
+    parkingLots: ParkingLot[];
+    total: string;
+}
+
+interface UnifiedParkingSpot {
+    number: string;
+    kind: ParkingSpotKinds;
+    type: ParkingSpotType;
+    status: ParkingSpotStatus;
+    vehicle: string;
+    ownerId: string;
+    rented: boolean;
+    timeFrom: string | null;
+    timeTo: string | null;
+    bookingId?: string; // только для арендованных
+}
+
+function isTimeDifferenceMoreThanTwoHours(start, end) {
+    if (!start || !end) return false;
+
+    // Преобразуем время в минуты
+    const [startHours, startMinutes] = start.split(':').map(Number);
+    const [endHours, endMinutes] = end.split(':').map(Number);
+
+    const startTotal = startHours * 60 + startMinutes;
+    const endTotal = endHours * 60 + endMinutes;
+
+    // Если время окончания меньше времени начала, предполагаем, что это на следующий день
+    const diff = endTotal < startTotal ?
+        (1440 - startTotal + endTotal) :
+        (endTotal - startTotal);
+
+    return diff > 120; // 120 минут = 2 часа
+}
+
+const getUnifiedParkingSpots = async (id: string): Promise<UnifiedParkingSpot[]> => {
+    try {
+        const response = await getSpotsByOwnerId(id);
+        const now = dayjs();
+
+        // Обработка данных
+        const rentedSpots = response.data.bookings
+            .filter(booking => dayjs(booking.timeTo).isAfter(now))
+            .map(booking => {
+                const parkingLot = response.data.parkingLots.find(lot => lot.number === booking.parkingLot);
+                const type = isTimeDifferenceMoreThanTwoHours(booking.timeFrom, booking.timeTo)
+                    ? ParkingSpotType.ShortTermRentByMeParkingType
+                    : ParkingSpotType.LongTermRentByMeParkingType;
+
+                return {
+                    number: booking.parkingLot,
+                    kind: parkingLot?.kind || ParkingSpotKinds.REGULAR_PARKING_KIND,
+                    type: type,
+                    status: ParkingSpotStatus.MineParkingLotStatus,
+                    vehicle: booking.vehicle,
+                    ownerId: booking.userId,
+                    rented: true,
+                    timeFrom: booking.timeFrom,
+                    timeTo: booking.timeTo,
+                    bookingId: booking.bookingId
+                };
+            });
+
+        const nonRentedSpots = response.data.parkingLots
+            .filter(lot => !response.data.bookings.some(
+                booking => booking.parkingLot === lot.number && dayjs(booking.timeTo).isAfter(now)
+            ))
+            .map(lot => ({
+                number: lot.number,
+                kind: lot.kind as ParkingSpotKinds,
+                type: lot.type as ParkingSpotType,
+                status: lot.status as ParkingSpotStatus,
+                vehicle: lot.vehicle,
+                ownerId: lot.ownerId,
+                rented: false,
+                timeFrom: null,
+                timeTo: null
+            }));
+
+        return [...rentedSpots, ...nonRentedSpots];
+    } catch (error) {
+        console.error("Ошибка загрузки парковочных мест:", error);
+        return [];
+    }
+};
+
+
 const ParkingSpot: React.FC<ParkingSpotProps> = ({
                                                      number,
                                                      kind,
@@ -27,9 +146,22 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
 
                                                  }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [unifiedSpots, setUnifiedSpots] = useState<UnifiedParkingSpot[]>([]);
     const location = useLocation();
     const user = location.state?.user;
+
+    useEffect(() => {
+        const loadData = async () => {
+            if (user.id) {
+                const spots = await getUnifiedParkingSpots(user.id);
+                setUnifiedSpots(spots);
+            }
+        };
+        loadData();
+    }, [user.id]);
+
+    console.log("unifiedSpots", unifiedSpots)
+
     const getSpotClassesAndSymbols = () => {
         const classNames: string[] = [];
         const symbols: string[] = [];
@@ -110,18 +242,22 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
     const handleBook = async (bookingDetails: {
         start: string;
         end: string;
-        price: string;
+        vehicle: string;
+        userId: string;
+        number: string
+        rentalId: string
     }) => {
         try {
             const loadingToast = toast.loading('Бронируем место...');
 
             const bookingData = {
                 booking: {
-                    userId: user.userId,
-                    parkingLot: number,
-                    vehicle: vehicle,
+                    userId: bookingDetails.userId,
+                    parkingLot: bookingDetails.number,
+                    vehicle: bookingDetails.vehicle,
                     timeFrom: bookingDetails.start,
-                    timeTo: bookingDetails.end
+                    timeTo: bookingDetails.end,
+                    bookingId: bookingDetails.rentalId
                 }
             };
 
