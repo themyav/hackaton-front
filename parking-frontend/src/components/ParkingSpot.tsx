@@ -1,40 +1,106 @@
+// ParkingSpot.tsx
 import {useState} from "react";
 import BookingModal from "./BookingModal.tsx";
-import { toast } from 'react-hot-toast';
+import {toast} from 'react-hot-toast';
+import {ParkingSpotKinds, ParkingSpotStatus, ParkingSpotType} from "../constants/enum.ts";
+import {addBooking} from "../api/api.ts"
+import {useLocation} from "react-router-dom";
 
+// ParkingSpot.tsx
 interface ParkingSpotProps {
-    number: string;
-    isDisabled?: boolean;
-    angle: number;
+    number: number;
+    kind?: ParkingSpotKinds;
+    type?: ParkingSpotType | null;
+    status?: ParkingSpotStatus | null;
+    owner_id?: string | null;
+    vehicle?: string | null;
+    angle?: number;
 }
 
 const ParkingSpot: React.FC<ParkingSpotProps> = ({
                                                      number,
-                                                     isDisabled = false,
+                                                     kind,
+                                                     type,
+                                                     status,
                                                      angle = 0,
+                                                     vehicle,
+
                                                  }) => {
-    const [isOccupied, setIsOccupied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const location = useLocation();
+    const user = location.state?.user;
+    const getSpotClassesAndSymbols = () => {
+        const classNames: string[] = [];
+        const symbols: string[] = [];
+
+        // Обрабатываем kind
+        switch (kind) {
+            case ParkingSpotKinds.INCLUSIVE_PARKING_KIND:
+                symbols.push("♿");
+                classNames.push("busyStatus")
+                break;
+            case ParkingSpotKinds.SPECIAL_PARKING_KIND:
+                symbols.push("🚔");
+                classNames.push("busyStatus")
+                break;
+        }
+
+        if (kind !== ParkingSpotKinds.REGULAR_PARKING_KIND) {
+            return {classNames, symbols};
+        }
+
+        // Обрабатываем status
+        switch (status) {
+            case ParkingSpotStatus.FreeParkingLotStatus:
+                classNames.push("freeStatus");
+                break;
+            case ParkingSpotStatus.BusyParkingLotStatus:
+                classNames.push("busyStatus");
+                break;
+            case ParkingSpotStatus.MineParkingLotStatus:
+                classNames.push("mineStatus");
+                break;
+            case ParkingSpotStatus.ExpiredParkingLotStatus:
+                classNames.push("expiredStatus");
+                break;
+        }
+
+        // Обрабатываем type
+        switch (type) {
+            case ParkingSpotType.UndefinedParkingType:
+                break
+            case ParkingSpotType.OwnedParkingType:
+                symbols.push("🔒");
+                break;
+            case ParkingSpotType.LongTermRentByMeParkingType:
+                symbols.push("💰");
+                break;
+            case ParkingSpotType.ShortTermRentByMeParkingType:
+                symbols.push("💰🕧");
+                break;
+            case ParkingSpotType.LongTermRentByOtherParkingType:
+                symbols.push("🅿️");
+                break;
+            case ParkingSpotType.ShortTermRentByOtherParkingType:
+                symbols.push("🅿️🕧");
+                break;
+        }
+
+        return {classNames, symbols};
+    };
+
+    const {classNames, symbols} = getSpotClassesAndSymbols();
 
     const handleSpotClick = () => {
         setIsModalOpen(true);
-
     };
-
-
 
     const handlePurchase = async () => {
         try {
-
             await new Promise(resolve => setTimeout(resolve, 500));
-
-            console.log("Купили место", number);
-
-            // throw new Error("qe");
-            setIsOccupied(true);
-            setIsModalOpen(false);
-
             toast.success(`Место ${number} успешно приобретено!`);
+            setIsModalOpen(false);
         } catch (error) {
             toast.error('Ошибка при покупке');
             console.error("Purchase error:", error);
@@ -42,7 +108,6 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
     };
 
     const handleBook = async (bookingDetails: {
-        spot: string;
         start: string;
         end: string;
         price: string;
@@ -50,32 +115,63 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
         try {
             const loadingToast = toast.loading('Бронируем место...');
 
-            // Имитация API-запроса
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const bookingData = {
+                booking: {
+                    userId: user.userId,
+                    parkingLot: number,
+                    vehicle: vehicle,
+                    timeFrom: bookingDetails.start,
+                    timeTo: bookingDetails.end
+                }
+            };
 
-            console.log("Бронь создана:", bookingDetails);
-            setIsOccupied(true);
+            await addBooking(bookingData);
+
+            toast.dismiss(loadingToast);
+            toast.success(`Место ${number} успешно забронировано!`, {duration: 4000});
             setIsModalOpen(false);
-
-            toast.success(`Место ${number} успешно забронировано!`, {
-                duration: 4000,
-            });
         } catch (error) {
             toast.error('Ошибка при бронировании');
             console.error("Booking error:", error);
         }
-        // Убрали finally с toast.dismiss()
     };
 
     return (
         <>
             <style>
-                {`                
-                .disabledIcon {
+                {`         
+                
+                .busyStatus {
+                    background-color: #918e8e;
+                }
+                
+                .freeStatus {
+                    background-color: #95d980;
+                }
+                
+                .mineStatus {
+                    background-color: #4bb8f2;
+                }
+                
+                .expiredStatus {
+                    background-color: #f06359;
+                }
+                
+                .special {
+                    background-color: #ffc107;
+                }
+                
+                .symbols {
+                    position: absolute;
+                    bottom: 5px;
+                    right: 5px;
+                    font-size: 12px;
+                }       
+                .icons {
                     position: absolute;
                     top: 5px;
                     left: 5px;
-                    font-size: 20px;
+                    font-size: 15px;
                     transform: none;
                     z-index: 1; 
                 }
@@ -91,7 +187,7 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
                     border: 1px solid black;
                     border-bottom: 1px solid white;
                     position: relative;
-                    transition: background-color 0.3s ease;
+                    transition: all 0.3s ease;
                 }
                 
                 .spotNumber {
@@ -101,15 +197,8 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
                     transform: translate(-50%, -50%);
                     pointer-events: none;
                 }
-                
-                .disabled {
-                    background-color: #add8e6;
-                }
-                
-                .occupied {
-                    background-color: grey;
-                    cursor: not-allowed;
-                }
+
+               
                 `}
             </style>
 
@@ -117,21 +206,25 @@ const ParkingSpot: React.FC<ParkingSpotProps> = ({
                 <div
                     className={[
                         "spot",
-                        isOccupied && "occupied",
-                        isDisabled && "disabled"
+                        ...classNames,
                     ].filter(Boolean).join(" ")}
                     onClick={handleSpotClick}
                     style={{transform: `rotate(${angle}deg)`}}
-                />
-                <span className="spotNumber">{number}</span>
-                {isDisabled && <div className="disabledIcon">♿</div>}
+                >
+                    <span className="spotNumber">{number}</span>
+                    {symbols.length > 0 && (
+                        <span className="icons">{symbols.join('')}</span>
+                    )}
+                </div>
+
 
                 <BookingModal
                     open={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    spotNumber={number}
+                    spotNumber={number.toString()}
                     onBook={handleBook}
                     onPurchase={handlePurchase}
+                    status={status}
                 />
             </div>
         </>
