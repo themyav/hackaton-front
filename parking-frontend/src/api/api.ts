@@ -53,6 +53,7 @@ export const updateUser = async (user) => {
 
 export const getParkingSpotList = async (userId: String) => {
     try {
+        console.log('Request is: ', userId)
         const responce = await axios.get(`${BASE_URL}/my/parking/list`, {
             params: {
                 "filter.ownerId": `${userId}`
@@ -77,6 +78,7 @@ export const addBooking = async (userData) => {
 }
 
 export const changeCarNumberForOwner = async (parking) => {
+    console.log("Request is ", parking)
     try {
         return await axios.post(`${BASE_URL}/parking/update`, parking);
     } catch (error) {

@@ -81,7 +81,6 @@ const MyParkingsPage: React.FC = () => {
                 const combined: CombinedParkingInfo[] = [];
 
                 response.data.parkingLots
-                    .filter(lot => lot.ownerId === user.id)
                     .forEach(lot => {
                         combined.push({
                             number: lot.number,
