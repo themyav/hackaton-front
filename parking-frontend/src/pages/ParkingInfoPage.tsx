@@ -10,19 +10,72 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
 import {CombinedParkingInfo} from './MyParkingsPage';
+import {changeCarNumberForArendator, changeCarNumberForOwner} from "../api/api.ts";
 
 const ParkingInfoPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { parkingInfo, user } = location.state as {
+    const {parkingInfo: initialParkingInfo, user} = location.state as {
         parkingInfo: CombinedParkingInfo,
-        user: User
+        user: any
     };
+
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [parkingInfo, setParkingInfo] = React.useState(initialParkingInfo);
+    const [vehicle, setVehicle] = React.useState(parkingInfo.vehicle || '');
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState('');
 
     const handlePayClick = () => {
         // Логика оплаты будет добавлена позже
         console.log('Оплата парковочного места', parkingInfo.number);
+    };
+
+    const handleEditClick = () => {
+        setIsEditing(true);
+    };
+
+    const handleSaveClick = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+            if (parkingInfo.isOwned) {
+                // Запрос для владельца
+                let response = await changeCarNumberForOwner(parkingInfo);
+                if (response.status === 200) {
+                    console.log("status changed succesfully")
+                } else {
+                    console.log("Problems with status change")
+                }
+            } else if (parkingInfo.isBooked) {
+                let response = await changeCarNumberForArendator({bookingId: 1, vehicle: parkingInfo.vehicle});
+                if (response.status === 200) {
+                    console.log("status changed succesfully")
+                } else {
+                    console.log("Problems with status change")
+                }
+            }
+
+            // Обновляем локальное состояние
+            setParkingInfo({
+                ...parkingInfo,
+                vehicle: vehicle
+            });
+            setIsEditing(false);
+        } catch (err) {
+            setError('Ошибка при обновлении данных');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCancelClick = () => {
+        setVehicle(parkingInfo.vehicle || '');
+        setIsEditing(false);
     };
 
     return (
@@ -32,6 +85,12 @@ const ParkingInfoPage: React.FC = () => {
                     Информация о парковочном месте #{parkingInfo.number}
                 </Typography>
 
+                {error && (
+                    <Typography color="error" sx={{textAlign: 'center', mb: 2}}>
+                        {error}
+                    </Typography>
+                )}
+
                 <Paper elevation={3} sx={{p: 3, mb: 3}}>
                     <List>
                         <ListItem>
@@ -40,35 +99,45 @@ const ParkingInfoPage: React.FC = () => {
                                 secondary={parkingInfo.number}
                             />
                         </ListItem>
-                        <Divider />
+                        <Divider/>
                         <ListItem>
                             <ListItemText
                                 primary="Тип"
                                 secondary={parkingInfo.type}
                             />
                         </ListItem>
-                        <Divider />
+                        <Divider/>
                         <ListItem>
                             <ListItemText
                                 primary="Вид"
                                 secondary={parkingInfo.kind}
                             />
                         </ListItem>
-                        <Divider />
+                        <Divider/>
                         <ListItem>
                             <ListItemText
                                 primary="Статус"
                                 secondary={parkingInfo.status}
                             />
                         </ListItem>
-                        <Divider />
+                        <Divider/>
                         <ListItem>
-                            <ListItemText
-                                primary="Транспорт"
-                                secondary={parkingInfo.vehicle || 'Не указан'}
-                            />
+                            {isEditing ? (
+                                <TextField
+                                    fullWidth
+                                    label="Транспорт"
+                                    value={vehicle}
+                                    onChange={(e) => setVehicle(e.target.value)}
+                                    variant="outlined"
+                                />
+                            ) : (
+                                <ListItemText
+                                    primary="Транспорт"
+                                    secondary={parkingInfo.vehicle || 'Не указан'}
+                                />
+                            )}
                         </ListItem>
-                        <Divider />
+                        <Divider/>
                         <ListItem>
                             <ListItemText
                                 primary="Статус владения"
@@ -78,14 +147,14 @@ const ParkingInfoPage: React.FC = () => {
 
                         {parkingInfo.isBooked && (
                             <>
-                                <Divider />
+                                <Divider/>
                                 <ListItem>
                                     <ListItemText
                                         primary="Бронирование с"
                                         secondary={new Date(parkingInfo.bookingInfo!.timeFrom).toLocaleString()}
                                     />
                                 </ListItem>
-                                <Divider />
+                                <Divider/>
                                 <ListItem>
                                     <ListItemText
                                         primary="Бронирование по"
@@ -94,14 +163,14 @@ const ParkingInfoPage: React.FC = () => {
                                 </ListItem>
                                 {parkingInfo.rentalInfo && (
                                     <>
-                                        <Divider />
+                                        <Divider/>
                                         <ListItem>
                                             <ListItemText
                                                 primary="Стоимость за час"
                                                 secondary={`${parkingInfo.rentalInfo.costPerHour} руб.`}
                                             />
                                         </ListItem>
-                                        <Divider />
+                                        <Divider/>
                                         <ListItem>
                                             <ListItemText
                                                 primary="Стоимость за день"
@@ -116,21 +185,52 @@ const ParkingInfoPage: React.FC = () => {
                 </Paper>
 
                 <Box sx={{display: 'flex', justifyContent: 'center', gap: 2}}>
-                    {parkingInfo.isBooked && !parkingInfo.isOwned && (
-                        <Button
-                            variant="contained"
-                            color="success"
-                            onClick={handlePayClick}
-                        >
-                            Оплатить
-                        </Button>
+                    {!isEditing ? (
+                        <>
+                            {parkingInfo.isBooked && !parkingInfo.isOwned && (
+                                <Button
+                                    variant="contained"
+                                    color="success"
+                                    onClick={handlePayClick}
+                                    disabled={loading}
+                                >
+                                    Оплатить
+                                </Button>
+                            )}
+                            <Button
+                                variant="contained"
+                                onClick={handleEditClick}
+                                disabled={loading}
+                            >
+                                Редактировать
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                onClick={() => navigate(-1)}
+                                disabled={loading}
+                            >
+                                Назад к списку
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleSaveClick}
+                                disabled={loading}
+                            >
+                                {loading ? 'Сохранение...' : 'Сохранить'}
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                onClick={handleCancelClick}
+                                disabled={loading}
+                            >
+                                Отмена
+                            </Button>
+                        </>
                     )}
-                    <Button
-                        variant="contained"
-                        onClick={() => navigate(-1)}
-                    >
-                        Назад к списку
-                    </Button>
                 </Box>
             </Box>
         </NavBar>

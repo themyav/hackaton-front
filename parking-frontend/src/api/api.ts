@@ -108,3 +108,19 @@ export const getParkingSpotList = async () => {
         throw error;
     }
 }
+
+export const changeCarNumberForOwner = async (parking) => {
+    try {
+        return await axios.post(`${BASE_URL}/parking/update`, parking);
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const changeCarNumberForArendator = async (booking) => {
+    try {
+        return await axios.post(`${BASE_URL}/booking/edit`, booking);
+    } catch (error) {
+        throw error;
+    }
+}
