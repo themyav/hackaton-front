@@ -40,6 +40,17 @@ export const getUserById = async (id) => {
     }
 }
 
+export const updateUser = async (user) => {
+    try {
+        console.log(user)
+        const responce = await axios.post(`${BASE_URL}/user/update`, user);
+        console.log(responce)
+        return responce
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const getParkingSpotList = async () => {
     try {
         const response = await axios.post(`${BASE_URL}/parking/list`);

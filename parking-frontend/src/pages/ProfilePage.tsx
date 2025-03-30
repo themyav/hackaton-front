@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import IconButton from '@mui/material/IconButton';
 import NavBar from "../navigation/NavBar.tsx";
+import {updateUser} from "../api/api.ts";
+import {useState} from "react";
 
 function ProfilePage() {
     const navigate = useNavigate();
@@ -14,20 +16,35 @@ function ProfilePage() {
     const [user, setUser] = React.useState(location.state?.user || {
         id: '',
         phoneNumber: '',
-        user_type: '',
+        userType: '',
         name: '',
         surname: '',
         patronimic: ''
     });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
 
-    const handleSave = () => {
-        // API call would go here
-        console.log("User data saved:", user);
-        // navigate(-1); // Go back to previous page
+    const handleSave = async () => {
+        setError('');
+        setLoading(true);
+
+        try {
+            const response = await updateUser(user);
+            if (response.status === 200) {
+                setSaveSuccess(true);
+                location.state.user = user
+            }
+        } catch (error) {
+            setError('Ошибка при сохранении данных. Пожалуйста, попробуйте позже.');
+            console.error('Update Error:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCancel = () => {
-        navigate(-1); // Go back to previous page
+        navigate("/home", {state: {user: location.state.user}}); // Возвращаемся назад
     };
 
     const handleChange = (e) => {
@@ -36,9 +53,9 @@ function ProfilePage() {
     };
 
     const handleUserType = (t) => {
-        if (t == "REGULAR_USER_TYPE") return "Жилец"
-        else return "Привилегированный"
-    }
+        if (t === "REGULAR_USER_TYPE") return "Жилец";
+        return "Привилегированный";
+    };
 
     return (
         <NavBar>
@@ -51,6 +68,22 @@ function ProfilePage() {
                 </Box>
 
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    {error && (
+                        <Typography color="error" textAlign="center" sx={{mb: 2}}>
+                            {error}
+                        </Typography>
+                    )}
+                    {saveSuccess && (
+                        <Typography color="success.main" textAlign="center" sx={{mb: 2}}>
+                            Данные успешно сохранены!
+                        </Typography>
+                    )}
+                    {loading && (
+                        <Typography color="text.secondary" textAlign="center" sx={{mb: 2}}>
+                            Подождите...
+                        </Typography>
+                    )}
+
                     <TextField
                         label="Номер телефона"
                         variant="outlined"
@@ -74,6 +107,7 @@ function ProfilePage() {
                         name="name"
                         value={user.name}
                         onChange={handleChange}
+                        disabled={loading}
                     />
                     <TextField
                         label="Фамилия"
@@ -82,6 +116,7 @@ function ProfilePage() {
                         name="surname"
                         value={user.surname}
                         onChange={handleChange}
+                        disabled={loading}
                     />
                     <TextField
                         label="Отчество"
@@ -90,6 +125,7 @@ function ProfilePage() {
                         name="patronimic"
                         value={user.patronimic}
                         onChange={handleChange}
+                        disabled={loading}
                     />
 
                     <Box sx={{display: 'flex', gap: 2, mt: 2}}>
@@ -98,6 +134,7 @@ function ProfilePage() {
                             color="primary"
                             onClick={handleSave}
                             fullWidth
+                            disabled={loading}
                         >
                             Сохранить
                         </Button>
@@ -106,8 +143,9 @@ function ProfilePage() {
                             color="secondary"
                             onClick={handleCancel}
                             fullWidth
+                            disabled={loading}
                         >
-                            Отмена
+                            Назад
                         </Button>
                     </Box>
                 </Box>
