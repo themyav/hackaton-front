@@ -10,6 +10,11 @@
 Ознакомиться с установкой можно на официальном сайте:
 https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
+  Перейдите в директорию, которая содержит реакт
+  ```
+  cd packing-frontend
+  ```
+
   Установите необходимые модули
   ```
   npm install
