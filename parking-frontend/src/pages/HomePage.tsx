@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import {useNavigate, useLocation} from 'react-router-dom';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
 import NavBar from '../navigation/NavBar.tsx';
-import { handleUserType } from "../formatters/UserTypeFormatter.ts";
+import {handleUserType} from "../formatters/UserTypeFormatter.ts";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -18,11 +18,11 @@ const HomePage: React.FC = () => {
     };
 
     const handleEditProfile = () => {
-        navigate('/profile', { state: { user } });
+        navigate('/profile', {state: {user}});
     };
 
     const printHelloMessage = () => {
-        if(user.name === '') return "Добро пожаловать!"
+        if (user.name === '' || user.name === undefined) return "Добро пожаловать!"
         else return `Добро пожаловать, ${user.name}!`
     }
 
@@ -40,8 +40,8 @@ const HomePage: React.FC = () => {
                     {printHelloMessage()}
                 </Typography>
 
-                <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Paper elevation={3} sx={{p: 3, borderRadius: 2}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                         <Box>
                             <Typography variant="overline" color="text.secondary">
                                 Номер телефона
@@ -51,7 +51,7 @@ const HomePage: React.FC = () => {
                             </Typography>
                         </Box>
 
-                        <Divider />
+                        <Divider/>
 
                         <Box>
                             <Typography variant="overline" color="text.secondary">
@@ -62,7 +62,7 @@ const HomePage: React.FC = () => {
                             </Typography>
                         </Box>
 
-                        <Divider />
+                        <Divider/>
 
                         <Box>
                             <Typography variant="overline" color="text.secondary">
@@ -79,7 +79,7 @@ const HomePage: React.FC = () => {
                     display: 'flex',
                     gap: 2,
                     mt: 2,
-                    flexDirection: { xs: 'column', sm: 'row' }
+                    flexDirection: {xs: 'column', sm: 'row'}
                 }}>
                     <Button
                         variant="contained"
