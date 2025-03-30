@@ -20,7 +20,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import {tableStyle} from "../styles/TableStyle.tsx";
 
 
-
 interface ParkingData {
     bookings: Array<{
         userId: string;
@@ -160,6 +159,15 @@ const MyParkingsPage: React.FC = () => {
         );
     }
 
+    const handleInfoClick = (item: CombinedParkingInfo) => {
+        navigate('/parking-info', {
+            state: {
+                parkingInfo: item,
+                user: user
+            }
+        });
+    };
+
     return (
         <NavBar>
             <Box sx={{p: 3}}>
@@ -209,7 +217,7 @@ const MyParkingsPage: React.FC = () => {
                                                     color="primary"
                                                     onClick={() => handleInfoClick(row)}
                                                 >
-                                                    <InfoIcon />
+                                                    <InfoIcon/>
                                                 </IconButton>
                                             </Tooltip>
                                         </TableCell>

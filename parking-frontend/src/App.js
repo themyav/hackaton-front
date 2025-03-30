@@ -12,6 +12,7 @@ import {Toaster} from 'react-hot-toast';
 
 import BookingModal from "./components/BookingModal.tsx";
 import ParkingSpot from "./components/ParkingSpot.tsx";
+import ParkingInfoPage from "./pages/ParkingInfoPage.tsx";
 
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
                         <Route path="/my-parkings" element={<MyParkingsPage/>}/>
                         <Route path="/reports" element={<ReportPage/>}/>
                         <Route path="/map" element={<MapPage/>}/>
+                        <Route path="/parking-info" element={<ParkingInfoPage/>}/>
                     </Routes>
                 </div>
             </Router>
