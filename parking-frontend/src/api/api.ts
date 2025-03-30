@@ -54,3 +54,13 @@ export const getUserByPhoneNumber = async (phoneNumber) => {
         throw error;
     }
 }
+
+export const getParkingSpotList = async () => {
+    try {
+        const response = await axios.post(`${BASE_URL}/parking/list`);
+        console.log(response)
+        return response
+    } catch (error) {
+        throw error;
+    }
+}

@@ -62,6 +62,8 @@ const MapPage = ({
                     
                     .parking-map {
                         border: 0.3rem solid black;
+                        border-top: none; /* ← Это ключевое изменение! */
+                        border-bottom: none; /* ← Это ключевое изменение! */
                         width: 90vw;
                         height: 90vh;
                         max-width: 1600px;
@@ -73,6 +75,34 @@ const MapPage = ({
                         box-sizing: border-box;
                         position: relative;
                         background: white;
+                    }
+ 
+                     /* Стили для границ */
+                    .border-top-left {
+                        position: absolute;
+                        top: -0.3rem;
+                        left: 0;
+                        right: calc(50% + 200px);
+                        height: 0.3rem;
+                        background: black;
+                    }
+                    
+                    .border-top-right {
+                        position: absolute;
+                        top: -0.3rem;
+                        right: 0;
+                        left: calc(50% + 200px);
+                        height: 0.3rem;
+                        background: black;
+                    }
+                    
+                    .border-bottom {
+                        position: absolute;
+                        bottom: -0.3rem;
+                        left: 0;
+                        right: 200px; /* Разрыв 200px справа */
+                        height: 0.3rem;
+                        background: black;
                     }
 
                     .parking-grid {
@@ -88,11 +118,16 @@ const MapPage = ({
                         justify-content: space-around;
                         gap: 0.5rem;
                     }
+                    
+
                 `}
             </style>
 
             <div className="map-container">
                 <div className="parking-map">
+
+                    <div className="border-top-left" />
+                    <div className="border-top-right" />
                     <div className="parking-grid">
                         {rowGroups.map((group, groupIndex) => (
                             <div key={`group-${groupIndex}`} className="parking-group">
@@ -108,6 +143,8 @@ const MapPage = ({
                             </div>
                         ))}
                     </div>
+                    <div className="border-bottom" />
+
                 </div>
             </div>
         </NavBar>

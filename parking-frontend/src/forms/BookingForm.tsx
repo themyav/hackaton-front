@@ -203,7 +203,6 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                     minDateTime={bookingData.startDateTime || dayjs()}
                     format="DD.MM.YYYY HH:mm"
                 />
-
                 <TextField
                     label="Длительность брони"
                     value={durationText || '—'}
