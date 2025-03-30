@@ -82,7 +82,7 @@ function ReportPage() {
                         Формирование отчета
                     </Typography>
                     <Typography gutterBottom>
-                        Получения отчета по местам, которые {user?.phone} сдает в аренду
+                        Здесь можно сформировать отчет по парковочным местам, которые Вы сдавали в аренду.
                     </Typography>
 
                     <Box sx={{display: 'flex', gap: 2, mb: 3}}>
@@ -115,7 +115,7 @@ function ReportPage() {
                         />
                     </Box>
 
-                    <FormControl fullWidth sx={{ mb: 2 }}>
+                    <FormControl fullWidth sx={{mb: 2}}>
                         <InputLabel id="parking-places-label">Номера парковочных мест</InputLabel>
                         <Select
                             labelId="parking-places-label"
@@ -124,7 +124,7 @@ function ReportPage() {
                             value={selectedPlaces}
                             onChange={handlePlaceChange}
                             renderValue={(selected) => (
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
                                     {selected.map((value) => (
                                         <Chip
                                             key={value}
