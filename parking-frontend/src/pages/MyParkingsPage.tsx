@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import NavBar from '../navigation/NavBar.tsx';
 import Box from '@mui/material/Box';
-import {getMyParkingList} from '../api/api.ts'; // Предполагается, что функция находится здесь
+import {getParkingSpotList} from '../api/api.ts'; // Предполагается, что функция находится здесь
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -17,7 +17,6 @@ import {useEffect, useState} from 'react';
 import {Tooltip} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from '@mui/icons-material/Info';
-import {tableStyle} from "../styles/TableStyle.tsx";
 
 
 interface ParkingData {
@@ -47,7 +46,7 @@ interface ParkingData {
     total: string;
 }
 
-interface CombinedParkingInfo {
+export interface CombinedParkingInfo {
     number: string;
     kind: string;
     type: string;
@@ -75,7 +74,8 @@ const MyParkingsPage: React.FC = () => {
             try {
                 if (!user?.id) return;
 
-                const response = await getMyParkingList(user.id);
+                const response = await getParkingSpotList(user.id);
+                console.log('Responce data is: ', response.data)
                 setParkingData(response.data);
 
                 const combined: CombinedParkingInfo[] = [];

@@ -11,7 +11,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
-import {CombinedParkingInfo} from './MyParkingsPage';
+import {CombinedParkingInfo} from './MyParkingsPage.tsx';
 import {changeCarNumberForArendator, changeCarNumberForOwner} from "../api/api.ts";
 
 const ParkingInfoPage: React.FC = () => {
