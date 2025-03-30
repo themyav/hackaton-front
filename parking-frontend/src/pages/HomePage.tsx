@@ -1,10 +1,12 @@
 import * as React from 'react';
-import {useNavigate, useLocation} from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
 import NavBar from '../navigation/NavBar.tsx';
-import {User} from '../interfaces/Interfaces.ts';
-import {getUserById} from "../api/api.ts";
+import { handleUserType } from "../formatters/UserTypeFormatter.ts";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -16,32 +18,90 @@ const HomePage: React.FC = () => {
     };
 
     const handleEditProfile = () => {
-        navigate('/profile', {state: {user}});
+        navigate('/profile', { state: { user } });
     };
+
+    const printHelloMessage = () => {
+        if(user.name === '') return "Добро пожаловать!"
+        else return `Добро пожаловать, ${user.name}!`
+    }
 
     return (
         <NavBar>
-            <div style={{padding: '20px', maxWidth: '400px', margin: '0 auto'}}>
-                <h1>Добро пожаловать!</h1>
-                <p><strong>Телефон:</strong> {user?.phoneNumber}</p>
+            <Box sx={{
+                p: 4,
+                maxWidth: '500px',
+                margin: '0 auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2
+            }}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                    {printHelloMessage()}
+                </Typography>
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleEditProfile}
-                    style={{margin: '10px 0'}}
-                >
-                    Редактировать профиль
-                </Button>
+                <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Box>
+                            <Typography variant="overline" color="text.secondary">
+                                Номер телефона
+                            </Typography>
+                            <Typography variant="body1">
+                                {user.phoneNumber}
+                            </Typography>
+                        </Box>
 
-                <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={handleLogout}
-                >
-                    Выйти
-                </Button>
-            </div>
+                        <Divider />
+
+                        <Box>
+                            <Typography variant="overline" color="text.secondary">
+                                Тип пользователя
+                            </Typography>
+                            <Typography variant="body1">
+                                {handleUserType(user.userType)}
+                            </Typography>
+                        </Box>
+
+                        <Divider />
+
+                        <Box>
+                            <Typography variant="overline" color="text.secondary">
+                                ФИО
+                            </Typography>
+                            <Typography variant="body1">
+                                {user.surname} {user.name} {user.patronimic}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </Paper>
+
+                <Box sx={{
+                    display: 'flex',
+                    gap: 2,
+                    mt: 2,
+                    flexDirection: { xs: 'column', sm: 'row' }
+                }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleEditProfile}
+                        fullWidth
+                        size="large"
+                    >
+                        Редактировать профиль
+                    </Button>
+
+                    <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={handleLogout}
+                        fullWidth
+                        size="large"
+                    >
+                        Выйти
+                    </Button>
+                </Box>
+            </Box>
         </NavBar>
     );
 };

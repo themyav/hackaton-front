@@ -9,6 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import NavBar from "../navigation/NavBar.tsx";
 import {updateUser} from "../api/api.ts";
 import {useState} from "react";
+import {handleUserType} from "../formatters/UserTypeFormatter.ts";
 
 function ProfilePage() {
     const navigate = useNavigate();
@@ -52,10 +53,6 @@ function ProfilePage() {
         setUser({...user, [name]: value});
     };
 
-    const handleUserType = (t) => {
-        if (t === "REGULAR_USER_TYPE") return "Жилец";
-        return "Привилегированный";
-    };
 
     return (
         <NavBar>
