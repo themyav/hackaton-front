@@ -4,11 +4,12 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import NavBar from '../navigation/NavBar.tsx';
 import {User} from '../interfaces/Interfaces.ts';
+import {getUserById} from "../api/api.ts";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const user = location.state?.phoneNumber;
+    const user = getUserById(location.state?.id);
 
     const handleLogout = () => {
         navigate('/login');

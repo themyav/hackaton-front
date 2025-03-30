@@ -23,7 +23,7 @@ const BASE_URL = 'http://localhost:8080'
 
 export const loginUser = async (userData) => {
     try {
-        console.log(`${BASE_URL}/sso/login`)
+        console.log(userData)
         const responce = await axios.post(`${BASE_URL}/sso/login`, userData);
         console.log(responce)
         return responce
@@ -43,11 +43,10 @@ export const registerUser = async (userData) => {
     }
 }
 
-export const getUserByPhoneNumber = async (phoneNumber) => {
+export const getUserById = async (id) => {
     try {
-        console.log(phoneNumber)
-        // TODO
-        const responce = await axios.post(`${BASE_URL}/sso/register`, phoneNumber);
+        console.log(id)
+        const responce = await axios.get(`${BASE_URL}/sso/get/user?userId=${id}`);
         console.log(responce)
         return responce
     } catch (error) {

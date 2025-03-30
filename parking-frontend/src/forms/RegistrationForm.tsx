@@ -4,7 +4,8 @@ import Button from '@mui/material/Button';
 import {useState} from "react";
 import {formStyle} from '../styles/FormStyle.tsx'
 import {formatPhone} from '../formatters/PhoneFormatter.ts'
-import {registerUser} from '../api/api.ts'; // Import the registerUser function
+import {registerUser} from '../api/api.ts';
+import {validatePhone} from "../validators/PhoneValidator.ts"; // Import the registerUser function
 
 
 function RegistrationForm() {
@@ -21,18 +22,17 @@ function RegistrationForm() {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
-        setLoading(true); // Set loading to true before the request
+        setLoading(true);
 
-        const phoneRegex = /^\+7 \d{3} \d{3} \d{2} \d{2}$/;
-        if (!phoneRegex.test(registrationData.phoneNumber)) {
+        if (!validatePhone(registrationData.phoneNumber)) {
             setError('Неверный формат номера телефона. Используйте формат: +7 XXX XXX XX XX');
-            setLoading(false); // Set loading to false if validation fails
+            setLoading(false);
             return;
         }
 
         if (registrationData.password !== registrationData.confirmPassword) {
             setError('Пароли не совпадают');
-            setLoading(false); // Set loading to false if validation fails
+            setLoading(false);
             return;
         }
 

@@ -6,6 +6,7 @@ import {loginUser} from '../api/api.ts';
 import {useNavigate} from 'react-router-dom';
 import {formStyle} from '../styles/FormStyle.tsx';
 import {formatPhone} from "../formatters/PhoneFormatter.ts";
+import {validatePhone} from "../validators/PhoneValidator.ts";
 
 function LoginForm() {
     const [loginData, setLoginData] = useState({
@@ -21,17 +22,24 @@ function LoginForm() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
+
+        if (!validatePhone(loginData.phoneNumber)) {
+            setError('Неверный формат номера телефона. Используйте формат: +7 XXX XXX XX XX');
+            setLoading(false);
+            return;
+        }
 
         try {
             const response = await loginUser(loginData);
             if (response.status === 200) {
                 console.log('Login successful!');
                 console.log(`${response.data.token}`)
-                navigate('/home', {state: {token: response.data.token, phoneNumber: loginData.phoneNumber}});
+                navigate('/home', {state: {token: response.data.token, id: response.data.userID}});
             }
         } catch (error) {
             setError('Неверные логин или пароль');
