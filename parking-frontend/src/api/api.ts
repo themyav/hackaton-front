@@ -51,9 +51,24 @@ export const updateUser = async (user) => {
     }
 }
 
-export const getParkingSpotList = async () => {
+export const getParkingSpotList = async (user: String) => {
     try {
-        const response = await axios.post(`${BASE_URL}/parking/list`);
+        const responce = await axios.get(`${BASE_URL}/parking/list`, {
+            params: {
+                userId: `${user}`
+            }
+        });
+        console.log(responce)
+        return responce
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+export const addBooking = async (userData) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/booking/add`, userData);
         console.log(response)
         return response
     } catch (error) {

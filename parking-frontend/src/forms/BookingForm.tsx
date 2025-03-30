@@ -1,17 +1,18 @@
-import { useState, useMemo } from 'react';
+import {useState, useMemo} from 'react';
 import {
     TextField,
     Button,
     Box,
     Typography
 } from '@mui/material';
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
+import {LocalizationProvider, DateTimePicker} from '@mui/x-date-pickers';
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs, {Dayjs} from 'dayjs';
 import 'dayjs/locale/ru';
 import duration from 'dayjs/plugin/duration';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { toast } from 'react-hot-toast';
+import {toast} from 'react-hot-toast';
+import {useLocation} from "react-router-dom";
 
 
 dayjs.extend(duration);
@@ -19,48 +20,33 @@ dayjs.extend(customParseFormat);
 dayjs.locale('ru');
 
 interface BookingFormProps {
-    spotNumber: string;
     onClose: () => void;
+    number: string;
+    userId: string;
     onBook: (bookingDetails: {
-        spot: string;
         start: string;
         end: string;
-        price: string;
-        car: string;
+        vehicle: string;
     }) => void;
 }
 
-const HOUR_RATE = 100;
-const DAY_RATE = 1500;
-const MIN_BOOKING_HOURS = 1;
 
-const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
+const BookingForm = ({onClose, onBook}: BookingFormProps) => {
     const [bookingData, setBookingData] = useState({
         startDateTime: null as Dayjs | null,
         endDateTime: null as Dayjs | null,
-        price: "0 ₽",
-        car: ""
+        number: "",
+        vehicle: null,
+        userId: "",
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const calculatePrice = (start: Dayjs | null, end: Dayjs | null): string => {
-        if (!start || !end) return "0 ₽";
-
-        const durationHours = end.diff(start, 'hour', true);
-        const durationDays = end.diff(start, 'day', true);
-
-        if (durationHours < MIN_BOOKING_HOURS) return "0 ₽";
-        if (durationHours >= 6) {
-            const days = Math.ceil(durationDays);
-            return `${days * DAY_RATE} ₽`;
-        }
-        const hours = Math.ceil(durationHours);
-        return `${hours * HOUR_RATE} ₽`;
-    };
+    const location = useLocation();
+    const user = location.state?.user;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setBookingData(prev => ({
             ...prev,
             [name]: value
@@ -72,13 +58,7 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
             ...bookingData,
             [name]: value
         };
-
         setBookingData(newData);
-
-        if (name === 'startDateTime' || name === 'endDateTime') {
-            const price = calculatePrice(newData.startDateTime, newData.endDateTime);
-            setBookingData(prev => ({ ...prev, price }));
-        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -86,44 +66,44 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
         setLoading(true);
 
         // try {
-            // Валидация (остается без изменений)
-            if (!bookingData.startDateTime || !bookingData.endDateTime) {
-                setError('Укажите дату и время начала/окончания');
-                toast.error('Заполните все поля');
-                setLoading(false);
-                return;
-            }
+        // Валидация (остается без изменений)
+        if (!bookingData.startDateTime || !bookingData.endDateTime) {
+            setError('Укажите дату и время начала/окончания');
+            toast.error('Заполните все поля');
+            setLoading(false);
+            return;
+        }
 
-            if (!bookingData.car) {
-                setError('Укажите номер машины');
-                toast.error('Введите номер автомобиля');
-                setLoading(false);
-                return;
-            }
+        if (!bookingData.vehicle) {
+            setError('Укажите номер машины');
+            toast.error('Введите номер автомобиля');
+            setLoading(false);
+            return;
+        }
 
-            if (bookingData.startDateTime.isAfter(bookingData.endDateTime)) {
-                setError('Дата окончания не может быть раньше даты начала');
-                toast.error('Некорректные даты бронирования');
-                setLoading(false);
-                return;
-            }
+        if (bookingData.startDateTime.isAfter(bookingData.endDateTime)) {
+            setError('Дата окончания не может быть раньше даты начала');
+            toast.error('Некорректные даты бронирования');
+            setLoading(false);
+            return;
+        }
 
-            if (bookingData.startDateTime.isSame(bookingData.endDateTime)) {
-                setError('Время бронирования должно быть больше 0');
-                toast.error('Минимальное время брони - 1 час');
-                setLoading(false);
-                return;
-            }
+        if (bookingData.startDateTime.isSame(bookingData.endDateTime)) {
+            setError('Время бронирования должно быть больше 0');
+            toast.error('Минимальное время брони - 1 час');
+            setLoading(false);
+            return;
+        }
 
-            const bookingDetails = {
-                spot: spotNumber,
-                start: bookingData.startDateTime.format('YYYY-MM-DD HH:mm'),
-                end: bookingData.endDateTime.format('YYYY-MM-DD HH:mm'),
-                price: bookingData.price,
-                car: bookingData.car
-            };
-            onBook(bookingDetails);
-            onClose();
+        const bookingDetails = {
+            number: bookingData.number,
+            start: bookingData.startDateTime.format('YYYY-MM-DD HH:mm'),
+            end: bookingData.endDateTime.format('YYYY-MM-DD HH:mm'),
+            userId: bookingData.userId,
+            vehicle: bookingData.vehicle
+        };
+        onBook(bookingDetails);
+        onClose();
 
     };
 
@@ -156,7 +136,7 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                 }}
             >
                 <Typography variant="h6" align="center">
-                    Бронирование места {spotNumber}
+                    Бронирование места {}
                 </Typography>
 
                 {error && (
@@ -165,15 +145,13 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                     </Typography>
                 )}
 
+
                 <TextField
                     label="Номер машины"
-                    variant="outlined"
+                    value={bookingData.vehicle}
                     fullWidth
-                    name="car"
-                    value={bookingData.car}
-                    onChange={handleChange}
                     required
-                    sx={{ mb: 2 }}
+                    sx={{mb: 2}}
                 />
 
                 <DateTimePicker
@@ -206,18 +184,29 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                 <TextField
                     label="Длительность брони"
                     value={durationText || '—'}
-                    InputProps={{ readOnly: true }}
+                    InputProps={{readOnly: true}}
                     fullWidth
                 />
 
-                <TextField
-                    label="Стоимость"
-                    value={bookingData.price}
-                    InputProps={{ readOnly: true }}
-                    fullWidth
-                />
+                {user.userType === "REGULAR_USER_TYPE" &&
+                    <TextField
+                        label="Пользователь"
+                        value={user.id}
+                        InputProps={{readOnly: true}}
+                        fullWidth
+                    />
+                }
 
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                {user.userType === "ADMINISTRATOR_USER_TYPE" &&
+                    <TextField
+                        label="Пользователь"
+                        value={bookingData.userId}
+                        fullWidth
+                    />
+                }
+
+
+                <Box sx={{display: 'flex', gap: 2}}>
                     <Button
                         variant="outlined"
                         fullWidth
@@ -229,7 +218,7 @@ const BookingForm = ({ spotNumber, onClose, onBook }: BookingFormProps) => {
                         type="submit"
                         variant="contained"
                         fullWidth
-                        disabled={loading || bookingData.price === "0 ₽" || !bookingData.car}
+                        disabled={loading || !bookingData.vehicle}
                     >
                         {loading ? 'Обработка...' : 'Забронировать'}
                     </Button>

@@ -1,7 +1,10 @@
 import * as React from 'react';
-import { Box, Button, Modal, Typography, Stack } from '@mui/material';
+import {Box, Button, Modal, Typography, Stack} from '@mui/material';
 import BookingForm from "../forms/BookingForm.tsx";
 import PurchaseForm from "../forms/PurchaseForm.tsx";
+import SpotInfo from "../components/SpotInfo.tsx";
+import {useLocation} from "react-router-dom";
+import {ParkingSpotStatus} from "../constants/enum.ts";
 
 
 const modalStyle = {
@@ -23,21 +26,23 @@ interface BookingModalProps {
     onClose: () => void;
     spotNumber: string;
     onBook: (bookingDetails: {
-        spot: string;
         start: string;
         end: string;
-        price: string;
     }) => void;
-    onPurchase?: () => void; // Колбэк для второй формы
+    onPurchase?: () => void;
+    status: string
 }
 
-function BookingModal({ open, onClose, spotNumber, onBook, onPurchase }: BookingModalProps) {
-    const [activeForm, setActiveForm] = React.useState<'choice' | 'booking' | 'purchse'>('choice');
+function BookingModal({open, onClose, spotNumber, onBook, onPurchase, status}: BookingModalProps) {
+    const [activeForm, setActiveForm] = React.useState<'choice' | 'booking' | 'another'>('choice');
 
     const handleClose = () => {
         setActiveForm('choice');
         onClose();
     };
+
+    const location = useLocation();
+    const user = location.state?.user;
 
     return (
         <Modal
@@ -59,16 +64,19 @@ function BookingModal({ open, onClose, spotNumber, onBook, onPurchase }: Booking
                             >
                                 Забронировать
                             </Button>
-                            <Button
-                                variant="outlined"
-                                onClick={() => setActiveForm('purchse')}
-                            >
-                                Купить
-                            </Button>
+                            {
+                                user.userType === "REGULAR_USER_TYPE" &&
+                                <Button
+                                    variant="outlined"
+                                    onClick={() => setActiveForm('another')}
+                                >
+                                    Купить
+                                </Button>
+                            }
                             <Button
                                 variant="text"
                                 onClick={handleClose}
-                                sx={{ mt: 2 }}
+                                sx={{mt: 2}}
                             >
                                 Отмена
                             </Button>
@@ -77,27 +85,53 @@ function BookingModal({ open, onClose, spotNumber, onBook, onPurchase }: Booking
                 )}
 
                 {activeForm === 'booking' && (
-                    <BookingForm
-                        spotNumber={spotNumber}
-                        onClose={() => setActiveForm('choice')}
-                        onBook={(details) => {
-                            onBook(details);
-                            handleClose();
-                        }}
-                    />
+                    (user.userType === "REGULAR_USER_TYPE" &&
+                        <BookingForm
+                            number={spotNumber}
+                            userId={user.userId}
+                            onClose={() => setActiveForm('choice')}
+                            onBook={(details) => {
+                                onBook(details);
+                                handleClose();
+                            }}
+                        />)
+
+                    ||
+                    (user.userType === "ADMINISTRATOR_USER_TYPE" &&
+                        (status === ParkingSpotStatus.FreeParkingLotStatus &&
+                            <BookingForm
+                                number={spotNumber}
+                                userId={user.userId}
+                                onClose={() => setActiveForm('choice')}
+                                onBook={(details) => {
+                                    onBook(details);
+                                    handleClose();
+                                }}
+                            />
+                        )
+                        ||
+                        (status !== ParkingSpotStatus.FreeParkingLotStatus &&
+                            <SpotInfo
+                                vehicle={"vehicle"}
+                                onClose={() => setActiveForm('choice')}
+                            />
+                        )
+                    )
                 )}
 
-                {activeForm === 'purchse' && (
-                    <PurchaseForm
-                        price="1500"
-                        onClose={() => setActiveForm('choice')}
-                        onPurchase={() => {
-                            onPurchase()
-                            console.log('Покупка совершена');
-                            handleClose();
-                        }}
-                    />
-                )}
+                {activeForm === 'another' &&
+                    (user.userType === "REGULAR_USER_TYPE" &&
+                        <PurchaseForm
+                            price="1500"
+                            onClose={() => setActiveForm('choice')}
+                            onPurchase={() => {
+                                onPurchase()
+                                console.log('Покупка совершена');
+                                handleClose();
+                            }}
+                        />)
+                }
+
             </Box>
         </Modal>
     );
