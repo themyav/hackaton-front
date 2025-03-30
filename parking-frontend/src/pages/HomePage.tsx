@@ -9,7 +9,7 @@ import {getUserById} from "../api/api.ts";
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const user = getUserById(location.state?.id);
+    const user = location.state?.user;
 
     const handleLogout = () => {
         navigate('/login');
@@ -23,7 +23,7 @@ const HomePage: React.FC = () => {
         <NavBar>
             <div style={{padding: '20px', maxWidth: '400px', margin: '0 auto'}}>
                 <h1>Добро пожаловать!</h1>
-                <p><strong>Телефон:</strong> {user?.phone}</p>
+                <p><strong>Телефон:</strong> {user?.phoneNumber}</p>
 
                 <Button
                     variant="contained"

@@ -2,7 +2,7 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import {useState} from 'react';
-import {loginUser} from '../api/api.ts';
+import {getUserById, loginUser} from '../api/api.ts';
 import {useNavigate} from 'react-router-dom';
 import {formStyle} from '../styles/FormStyle.tsx';
 import {formatPhone} from "../formatters/PhoneFormatter.ts";
@@ -39,7 +39,15 @@ function LoginForm() {
             if (response.status === 200) {
                 console.log('Login successful!');
                 console.log(`${response.data.token}`)
-                navigate('/home', {state: {token: response.data.token, id: response.data.userID}});
+                try {
+                    const response_user = await getUserById(response.data.userID);
+                    if (response.status === 200) {
+                        navigate('/home', {state: {token: response.data.token, user: response_user.data.user}});
+                    }
+                } catch (error) {
+                    setError('Ошибка получения данных о пользователе');
+                }
+
             }
         } catch (error) {
             setError('Неверные логин или пароль');

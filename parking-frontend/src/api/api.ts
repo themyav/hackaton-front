@@ -2,24 +2,6 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:8080'
 
-// export const loginUser = async (userData) => {
-//     console.log("Login operation")
-//     // This is a stub implementation that returns a mock response
-//     return new Promise((resolve) => {
-//         setTimeout(() => {
-//             resolve({
-//                 status: 200,
-//                 data: {
-//                     phone: userData.phone
-//                 }
-//             });
-//         }, 100); // Simulate network delay
-//     });
-// }
-//
-// export const registerUser = async (userData) => {
-//     console.log("Register operation")
-// }
 
 export const loginUser = async (userData) => {
     try {
@@ -46,8 +28,12 @@ export const registerUser = async (userData) => {
 export const getUserById = async (id) => {
     try {
         console.log(id)
-        const responce = await axios.get(`${BASE_URL}/sso/get/user?userId=${id}`);
-        console.log(responce)
+        const responce = await axios.get(`${BASE_URL}/user/get`, {
+            params: {
+                userId: `${id}`
+            }
+        });
+
         return responce
     } catch (error) {
         throw error;
