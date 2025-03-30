@@ -12,7 +12,7 @@ https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
   Перейдите в директорию, которая содержит реакт
   ```
-  cd packing-frontend
+  cd parcking-frontend
   ```
 
   Установите необходимые модули
