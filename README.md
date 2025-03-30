@@ -10,12 +10,10 @@
 Ознакомиться с установкой можно на официальном сайте:
 https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
-1.
   Установите необходимые модули
   ```
   npm install
   ```
-2.
   Запустите приложение
   ```
   npm start
